@@ -39,11 +39,31 @@ head(states)
 head(house)
 ```
 
-From the head() function we can already see some tidying that needs to be done, mostly in the `house` table.
+From the head() function we can already see some tidying that needs to be done, mostly in the `house` table. First, to make data analysis easier we will need to combine the `states` and `house` table; this will be done on the year and state columns. however, the state column in the house data set is in uppercase, compared to sentence case in the states table. Next, R has read district in as a string column rather than a numeric column.
+
+Next we will look at a quick summary of the data to find very obvious trends.
+
+```{r}
+summary(demographics)
+```
+
+
+```{r}
+summary(wages)
+```
+```{r}
+summary(states)
+```
+```{r}
+summary(house)
+```
+
+
 
 #### Items that need to be done
 
--   Sentence case
+-   Sentence case to house table
+-   fix `district` in the house table
 
 ### EDA
 
