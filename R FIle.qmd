@@ -1,0 +1,81 @@
+---
+title: "testibng"
+format: html
+editor: visual
+---
+
+### Loading Packages
+
+```{r}
+library(tidytuesdayR)
+library(tidyverse)
+```
+
+### Gathering Data
+
+```{r}
+# Union Data
+tuesdata <- tidytuesdayR::tt_load(2023, week = 36)
+
+demographics <- tuesdata$demographics
+wages <- tuesdata$wages
+states <- tuesdata$states
+
+
+# Election Data
+tuesdata <- tidytuesdayR::tt_load(2023, week = 45)
+
+house <- tuesdata$house
+```
+
+### Cleaning Data
+
+First, lets get an idea of what our data looks like.
+
+```{r}
+head(demographics)
+head(wages)
+head(states)
+head(house)
+```
+
+From the head() function we can already see some tidying that needs to be done, mostly in the `house` table.
+
+#### Items that need to be done
+
+-   Sentence case
+
+### EDA
+
+```{r}
+states |> 
+  ggplot(aes(x = year, y = p_covered, color = state)) +
+  geom_point()
+```
+
+```{r}
+house <- house |>
+  mutate(state = str_to_sentence(state))
+```
+
+```{r}
+states |> 
+  filter(sector == "Total") |> 
+  left_join(house, by = c("year", "state")) |> 
+  filter(party == "DEMOCRAT" | party == "REPUBLICAN") |> 
+  filter(year > 2012) |> 
+  ggplot(aes(x = party, y = p_members)) +
+  geom_boxplot()
+```
+
+```{r}
+test <- states |> 
+  filter(sector == "Total") |> 
+  left_join(house, by = c("year", "state")) |> 
+  filter(party == "DEMOCRAT" | party == "REPUBLICAN") |> 
+  filter(year > 2012)
+```
+
+```{r}
+t.test(p_members ~ party, data = test, conf.level = .9)
+```
