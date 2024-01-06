@@ -30,6 +30,8 @@ house <- tuesdata$house
 
 ### Cleaning Data
 
+#### Examining data shape
+
 First, lets get an idea of what our data looks like.
 
 ```{r}
@@ -39,31 +41,44 @@ head(states)
 head(house)
 ```
 
-From the head() function we can already see some tidying that needs to be done, mostly in the `house` table. First, to make data analysis easier we will need to combine the `states` and `house` table; this will be done on the year and state columns. however, the state column in the house data set is in uppercase, compared to sentence case in the states table. Next, R has read district in as a string column rather than a numeric column.
+From the head() function we can already see some tidying that needs to be done, mostly in the `house` table. First, to make data analysis easier we will need to combine the `states` and `house` table; this will be done on the year and state columns. however, the state column in the house data set is in uppercase, compared to sentence case in the states table. Next, R has read district in as a string column rather than a numeric column. Examining the data set documentation, this is because 0 is actually "district at large" rather than a district number. This will be taken into account in data analysis.
 
 Next we will look at a quick summary of the data to find very obvious trends.
 
 ```{r}
 summary(demographics)
 ```
-
+From the summary, we can see the demographics has most of its variables skewed. This will be examined in closer detail in the exploratory data analysis. only two columns have NA values and each of those columns NA values represent less than 10% of the data. There is not an immediate cause to take action on these NA values, although they will be examined in greater detail in the EDA.
 
 ```{r}
 summary(wages)
 ```
+The `wages` table has no NA values. There is also nothing in the data documentation that would indicate a numeric value of some kind is being used as an NA value.
+
 ```{r}
 summary(states)
 ```
+Again, there are no NA values in the States data set, although we do see some significantly skewed data.
+
 ```{r}
 summary(house)
 ```
 
+in the house data set, we can see a significant amount of NA values in the runoff column
 
 
-#### Items that need to be done
 
--   Sentence case to house table
--   fix `district` in the house table
+
+#### Cleaning data script
+
+From a quick look at the shapes and distribution of the tables, the house table will be modified.
+
+```{r}
+house <- house |>
+  mutate(state = str_to_sentence(state)) |> # change from all caps to sentence case
+```
+
+
 
 ### EDA
 
