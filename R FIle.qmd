@@ -75,42 +75,52 @@ From a quick look at the shapes and distribution of the tables, the house table 
 
 ```{r}
 house <- house |>
-  mutate(state = str_to_sentence(state)) |> # change from all caps to sentence case
+  mutate(state = str_to_sentence(state)) |>  # change from all caps to sentence case
+  mutate(regions = state.region[match(state_po, state.abb)]) # add regions 
 ```
 
+#### Combining house and states dataframes
+The states data set has five entries for each year for each of the five `sectors`. For this project we will use the `total` sector. A decades column will also be added.
+
+```{r}
+full_data <- states |> 
+  filter(sector == "Total") |> 
+  left_join(house, by = c("year", "state")) |> 
+  filter(party == "DEMOCRAT" | party == "REPUBLICAN") |> 
+  mutate(decade = paste0((year - year %% 10), "s"),
+         party_binary = ifelse(party == "DEMOCRAT", 0, 1)) 
+```
 
 
 ### EDA
 
 ```{r}
-states |> 
-  ggplot(aes(x = year, y = p_covered, color = state)) +
-  geom_point()
+full_data |> 
+  ggplot(aes(x = year, y = p_covered, color = regions)) +
+  geom_point() +
+  geom_smooth()
 ```
 
-```{r}
-house <- house |>
-  mutate(state = str_to_sentence(state))
-```
 
 ```{r}
-states |> 
-  filter(sector == "Total") |> 
-  left_join(house, by = c("year", "state")) |> 
-  filter(party == "DEMOCRAT" | party == "REPUBLICAN") |> 
-  filter(year > 2012) |> 
+full_data |> 
   ggplot(aes(x = party, y = p_members)) +
-  geom_boxplot()
+  geom_boxplot() +
+  facet_wrap(vars(decade))
 ```
 
 ```{r}
-test <- states |> 
-  filter(sector == "Total") |> 
-  left_join(house, by = c("year", "state")) |> 
-  filter(party == "DEMOCRAT" | party == "REPUBLICAN") |> 
-  filter(year > 2012)
+t.test(p_members ~ party, data = full_data, conf.level = .9)
+```
+```{r}
+full_data_after_2008 <- full_data |> 
+  filter(year > 2008)
+t.test(p_members ~ party, data = full_data_after_2008, conf.level = .9)
+```
+## Modeling
+```{r}
+model <- glm(party_binary ~ p_members, family = "binomial", data = full_data)
+summary(model)
 ```
 
-```{r}
-t.test(p_members ~ party, data = test, conf.level = .9)
-```
+## Conclusion
