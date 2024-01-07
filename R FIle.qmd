@@ -8,6 +8,8 @@ editor: visual
 **This command will update all the branches on your computer**
 git remote update origin --prune
 
+showing off branch
+
 ### Loading Packages
 
 ```{r}
