@@ -33,15 +33,14 @@ union_states <- read_rds("../Data/union_states.rds")
 house <- read_rds("../Data/house.rds")
 
 # Wage Data
-tuesdata <- tidytuesdayR::tt_load(2021, week = 7)
-
-income_distribution <- tuesdata$income_distribution
+income_distribution <- read_rds("../Data/income_distribution.rds")
 
 # Minimum Wage Data
 minimum_wage <- read_csv("../Data/minimum_wage_data.csv")
 
 rm(tuesdata)
 ```
+
 
 ### Cleaning Data
 
