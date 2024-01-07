@@ -94,6 +94,8 @@ house <- house |>
 
 ```{r}
 union_wages <- union_wages |> 
+  filter(facet == "all wage and salary workers") |> 
+  distinct(year, .keep_all = TRUE) |> 
   select(-sample_size,
          -at_cap) |> 
   mutate(wage_percent_difference = union_wage_premium_raw, .keep = "unused") |> 
@@ -190,6 +192,15 @@ full_state_data <- full_state_data[, state_column_list]
 range(full_state_data$year)
 ```
 
+#### National Dataframes
+
+```{r}
+full_ntl_data <- income_distribution |> 
+  left_join(union_wages, by = "year")
+```
+```{r}
+range(full_ntl_data$year)
+```
 
 
 
