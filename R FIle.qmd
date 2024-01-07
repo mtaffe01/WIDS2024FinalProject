@@ -4,7 +4,10 @@ format: html
 editor: visual
 ---
 
-This is from the test branch
+# useful git commands
+**This command will update all the branches on your computer**
+git remote update origin --prune
+
 ### Loading Packages
 
 ```{r}
