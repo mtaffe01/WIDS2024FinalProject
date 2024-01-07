@@ -22,8 +22,6 @@ library(tidyverse)
 
 ```{r}
 # Union Data
-
-union_demographics <- read_rds("../Data/union_demographics.rds")
 union_wages <- read_rds("../Data/union_wages.rds")
 union_states <- read_rds("../Data/union_states.rds")
 
@@ -46,7 +44,6 @@ minimum_wage <- read_csv("../Data/minimum_wage_data.csv")
 First, lets get an idea of what our data looks like.
 
 ```{r}
-head(union_demographics)
 head(union_wages)
 head(union_states)
 head(house)
@@ -58,9 +55,6 @@ From the head() function we can already see some tidying that needs to be done, 
 
 Next we will look at a quick summary of the data to find very obvious trends.
 
-```{r}
-summary(demographics)
-```
 
 From the summary, we can see the demographics has most of its variables skewed. This will be examined in closer detail in the exploratory data analysis. only two columns have NA values and each of those columns NA values represent less than 10% of the data. There is not an immediate cause to take action on these NA values, although they will be examined in greater detail in the EDA.
 
@@ -91,28 +85,29 @@ house <- house |>
   mutate(state = str_to_sentence(state)) |> # change from all caps to sentence case) 
   select(!(state_fips:office)) |> #Remove unwanted columns
   select(!(stage:candidate)) |> 
-  select(!(writein:fusion_ticket))
-```
-
-```{r}
-union_demographics <- union_demographics |> 
-  select(-sample_size) |> 
-  mutate(union_type = facet, .keep = "unused")
+  select(!(writein:fusion_ticket)) 
 ```
 
 ```{r}
 union_wages <- union_wages |> 
   select(-sample_size,
          -at_cap) |> 
-  mutate(percent_difference = union_wage_premium_raw, .keep = "unused") |> 
-  mutate(percent_difference_adjusted = union_wage_premium_adjusted, .keep = "unused") |> 
+  mutate(wage_percent_difference = union_wage_premium_raw, .keep = "unused") |> 
+  mutate(wage_percent_difference_adjusted = union_wage_premium_adjusted, .keep = "unused") |> 
   mutate(union_type = facet, .keep = "unused")
 ```
 
 ```{r}
 union_states <- union_states |> 
   select(-state_census_code,
-         -observations)
+         -observations) |> 
+  mutate(employment_count = employment * 1000, .keep = "unused") |> 
+  mutate(union_employment_count = members * 1000, .keep = "unused") |> 
+  mutate(collective_bargaion_employment_count = covered * 1000, .keep = "unused") |> 
+  rename(
+    percent_union = p_members,
+    percent_collective_bargain = p_covered
+  )
 ```
 
 ```{r}
@@ -120,12 +115,24 @@ income_distribution <- income_distribution |>
   select(-number) |> 
   select(!ends_with("moe")) |> 
   select(year:income_mean) |> 
-  distinct(year, race, income_median, income_mean, .keep_all = TRUE) 
+  distinct(year, race, income_median, income_mean, .keep_all = TRUE) |> 
+  rename(median_income = income_median,
+         mean_income = income_mean)
 ```
 
 ```{r}
 minimum_wage <- minimum_wage |> 
-  select(Year:CPI.Average)
+  select(Year:CPI.Average) |> 
+  rename(year = Year,
+         state = State,
+         state_min_wage = State.Minimum.Wage,
+         state_min_wage_2020_adj = State.Minimum.Wage.2020.Dollars,
+         fed_min_wage = Federal.Minimum.Wage,
+         fed_min_wage_2020_adj = Federal.Minimum.Wage.2020.Dollars,
+         effective_min_wage = Effective.Minimum.Wage,
+         effective_min_wage_2020_adj = Effective.Minimum.Wage.2020.Dollars,
+         CPI_avg = CPI.Average
+  )
 ```
 
 
