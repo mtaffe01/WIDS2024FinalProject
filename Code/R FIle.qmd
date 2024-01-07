@@ -5,8 +5,8 @@ editor: visual
 ---
 
 # useful git commands
-**This command will update all the branches on your computer**
-git remote update origin --prune
+
+**This command will update all the branches on your computer** git remote update origin --prune
 
 showing off branch
 
@@ -41,13 +41,10 @@ tuesdata <- tidytuesdayR::tt_load(2021, week = 7)
 income_distribution <- tuesdata$income_distribution
 
 # Minimum Wage Data
-minimum_wage <- read_csv("./Data/minimum_wage_data.csv")
+minimum_wage <- read_csv("../Data/minimum_wage_data.csv")
 
 rm(tuesdata)
 ```
-
-
-
 
 ### Cleaning Data
 
@@ -69,16 +66,19 @@ Next we will look at a quick summary of the data to find very obvious trends.
 ```{r}
 summary(demographics)
 ```
+
 From the summary, we can see the demographics has most of its variables skewed. This will be examined in closer detail in the exploratory data analysis. only two columns have NA values and each of those columns NA values represent less than 10% of the data. There is not an immediate cause to take action on these NA values, although they will be examined in greater detail in the EDA.
 
 ```{r}
 summary(wages)
 ```
+
 The `wages` table has no NA values. There is also nothing in the data documentation that would indicate a numeric value of some kind is being used as an NA value.
 
 ```{r}
 summary(states)
 ```
+
 Again, there are no NA values in the States data set, although we do see some significantly skewed data.
 
 ```{r}
@@ -86,9 +86,6 @@ summary(house)
 ```
 
 in the house data set, we can see a significant amount of NA values in the runoff column
-
-
-
 
 #### Cleaning data script
 
@@ -101,6 +98,7 @@ house <- house |>
 ```
 
 #### Combining house and states dataframes
+
 The states data set has five entries for each year for each of the five `sectors`. For this project we will use the `total` sector. A decades column will also be added.
 
 ```{r}
@@ -112,7 +110,6 @@ full_data <- states |>
          party_binary = ifelse(party == "DEMOCRAT", 0, 1)) 
 ```
 
-
 ### EDA
 
 ```{r}
@@ -121,7 +118,6 @@ full_data |>
   geom_point() +
   geom_smooth()
 ```
-
 
 ```{r}
 full_data |> 
@@ -133,12 +129,15 @@ full_data |>
 ```{r}
 t.test(p_members ~ party, data = full_data, conf.level = .9)
 ```
+
 ```{r}
 full_data_after_2008 <- full_data |> 
   filter(year > 2008)
 t.test(p_members ~ party, data = full_data_after_2008, conf.level = .9)
 ```
+
 ## Modeling
+
 ```{r}
 model <- glm(party_binary ~ p_members, family = "binomial", data = full_data)
 summary(model)
