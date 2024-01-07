@@ -15,7 +15,6 @@ test
 ### Loading Packages
 
 ```{r}
-library(tidytuesdayR)
 library(tidyverse)
 ```
 
@@ -37,8 +36,6 @@ income_distribution <- read_rds("../Data/income_distribution.rds")
 
 # Minimum Wage Data
 minimum_wage <- read_csv("../Data/minimum_wage_data.csv")
-
-rm(tuesdata)
 ```
 
 
@@ -49,10 +46,12 @@ rm(tuesdata)
 First, lets get an idea of what our data looks like.
 
 ```{r}
-head(demographics)
-head(wages)
-head(states)
+head(union_demographics)
+head(union_wages)
+head(union_states)
 head(house)
+head(income_distribution)
+head(minimum_wage)
 ```
 
 From the head() function we can already see some tidying that needs to be done, mostly in the `house` table. First, to make data analysis easier we will need to combine the `states` and `house` table; this will be done on the year and state columns. however, the state column in the house data set is in uppercase, compared to sentence case in the states table. Next, R has read district in as a string column rather than a numeric column. Examining the data set documentation, this is because 0 is actually "district at large" rather than a district number. This will be taken into account in data analysis.
@@ -89,13 +88,57 @@ From a quick look at the shapes and distribution of the tables, the house table 
 
 ```{r}
 house <- house |>
-  mutate(state = str_to_sentence(state)) |>  # change from all caps to sentence case
-  mutate(regions = state.region[match(state_po, state.abb)]) # add regions 
+  mutate(state = str_to_sentence(state)) |> # change from all caps to sentence case) 
+  select(!(state_fips:office)) |> #Remove unwanted columns
+  select(!(stage:candidate)) |> 
+  select(!(writein:fusion_ticket))
 ```
+
+```{r}
+union_demographics <- union_demographics |> 
+  select(-sample_size) |> 
+  mutate(union_type = facet, .keep = "unused")
+```
+
+```{r}
+union_wages <- union_wages |> 
+  select(-sample_size,
+         -at_cap) |> 
+  mutate(percent_difference = union_wage_premium_raw, .keep = "unused") |> 
+  mutate(percent_difference_adjusted = union_wage_premium_adjusted, .keep = "unused") |> 
+  mutate(union_type = facet, .keep = "unused")
+```
+
+```{r}
+union_states <- union_states |> 
+  select(-state_census_code,
+         -observations)
+```
+
+```{r}
+income_distribution <- income_distribution |> 
+  select(-number) |> 
+  select(!ends_with("moe")) |> 
+  select(year:income_mean) |> 
+  distinct(year, race, income_median, income_mean, .keep_all = TRUE) 
+```
+
+```{r}
+minimum_wage <- minimum_wage |> 
+  select(Year:CPI.Average)
+```
+
+
+
 
 #### Combining house and states dataframes
 
 The states data set has five entries for each year for each of the five `sectors`. For this project we will use the `total` sector. A decades column will also be added.
+
+```{r}
+test <- minimum_wage
+```
+
 
 ```{r}
 full_data <- union_states |> 
