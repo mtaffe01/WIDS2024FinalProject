@@ -15,7 +15,6 @@ test
 ### Loading Packages
 
 ```{r}
-library(tidytuesdayR)
 library(tidyverse)
 ```
 
@@ -23,8 +22,6 @@ library(tidyverse)
 
 ```{r}
 # Union Data
-
-union_demographics <- read_rds("../Data/union_demographics.rds")
 union_wages <- read_rds("../Data/union_wages.rds")
 union_states <- read_rds("../Data/union_states.rds")
 
@@ -37,10 +34,7 @@ income_distribution <- read_rds("../Data/income_distribution.rds")
 
 # Minimum Wage Data
 minimum_wage <- read_csv("../Data/minimum_wage_data.csv")
-
-rm(tuesdata)
 ```
-
 
 ### Cleaning Data
 
@@ -49,30 +43,28 @@ rm(tuesdata)
 First, lets get an idea of what our data looks like.
 
 ```{r}
-head(demographics)
-head(wages)
-head(states)
+head(union_wages)
+head(union_states)
 head(house)
+head(income_distribution)
+head(minimum_wage)
 ```
 
 From the head() function we can already see some tidying that needs to be done, mostly in the `house` table. First, to make data analysis easier we will need to combine the `states` and `house` table; this will be done on the year and state columns. however, the state column in the house data set is in uppercase, compared to sentence case in the states table. Next, R has read district in as a string column rather than a numeric column. Examining the data set documentation, this is because 0 is actually "district at large" rather than a district number. This will be taken into account in data analysis.
 
 Next we will look at a quick summary of the data to find very obvious trends.
 
-```{r}
-summary(demographics)
-```
 
 From the summary, we can see the demographics has most of its variables skewed. This will be examined in closer detail in the exploratory data analysis. only two columns have NA values and each of those columns NA values represent less than 10% of the data. There is not an immediate cause to take action on these NA values, although they will be examined in greater detail in the EDA.
 
 ```{r}
-summary(wages)
+summary(union_wages)
 ```
 
 The `wages` table has no NA values. There is also nothing in the data documentation that would indicate a numeric value of some kind is being used as an NA value.
 
 ```{r}
-summary(states)
+summary(union_states)
 ```
 
 Again, there are no NA values in the States data set, although we do see some significantly skewed data.
@@ -89,55 +81,135 @@ From a quick look at the shapes and distribution of the tables, the house table 
 
 ```{r}
 house <- house |>
-  mutate(state = str_to_sentence(state)) |>  # change from all caps to sentence case
-  mutate(regions = state.region[match(state_po, state.abb)]) # add regions 
+  group_by(year, state, district) |> 
+  filter(candidatevotes == max(candidatevotes)) |> 
+  ungroup() |> 
+  mutate(state = str_to_sentence(state)) |> # change from all caps to sentence case) 
+  select(!(state_fips:office)) |> #Remove unwanted columns
+  select(!(stage:candidate)) |> 
+  select(!(writein:fusion_ticket)) |> 
+  rename(state_abbreviation = state_po)
 ```
 
-#### Combining house and states dataframes
+
+```{r}
+union_wages <- union_wages |> 
+  filter(facet == "all wage and salary workers") |> 
+  distinct(year, .keep_all = TRUE) |> 
+  select(-sample_size,
+         -at_cap) |> 
+  mutate(wage_percent_difference = union_wage_premium_raw, .keep = "unused") |> 
+  mutate(wage_percent_difference_adjusted = union_wage_premium_adjusted, .keep = "unused") |> 
+  mutate(union_type = facet, .keep = "unused")
+```
+
+```{r}
+union_states <- union_states |> 
+  select(-state_census_code,
+         -observations) |> 
+  mutate(employment_count = employment * 1000, .keep = "unused") |> 
+  mutate(union_employment_count = members * 1000, .keep = "unused") |> 
+  mutate(collective_bargain_employment_count = covered * 1000, .keep = "unused") |> 
+  rename(
+    percent_union = p_members,
+    percent_collective_bargain = p_covered
+  )
+```
+
+```{r}
+income_distribution <- income_distribution |> 
+  select(-number) |> 
+  select(!ends_with("moe")) |> 
+  select(year:income_mean) |> 
+  distinct(year, race, income_median, income_mean, .keep_all = TRUE) |> 
+  rename(median_income = income_median,
+         mean_income = income_mean)
+```
+
+```{r}
+minimum_wage <- minimum_wage |> 
+  select(Year:CPI.Average) |> 
+  rename(year = Year,
+         state = State,
+         state_min_wage = State.Minimum.Wage,
+         state_min_wage_2020_adj = State.Minimum.Wage.2020.Dollars,
+         fed_min_wage = Federal.Minimum.Wage,
+         fed_min_wage_2020_adj = Federal.Minimum.Wage.2020.Dollars,
+         effective_min_wage = Effective.Minimum.Wage,
+         effective_min_wage_2020_adj = Effective.Minimum.Wage.2020.Dollars,
+         CPI_avg = CPI.Average
+  )
+```
+
+```{r}
+head(union_wages)
+head(union_states)
+head(house)
+head(income_distribution)
+head(minimum_wage)
+```
+```{r}
+range(union_wages$year) #ntl
+range(union_states$year) # state
+range(house$year) # state
+range(income_distribution$year) # ntl
+range(minimum_wage$year) # state
+```
+
+### Combining dataframes
 
 The states data set has five entries for each year for each of the five `sectors`. For this project we will use the `total` sector. A decades column will also be added.
 
+
+#### State Dataframes
 ```{r}
-full_data <- union_states |> 
+full_state_data <- union_states |> 
   filter(sector == "Total") |> 
+  select(-sector,
+         -state_abbreviation) |> 
   left_join(house, by = c("year", "state")) |> 
   filter(party == "DEMOCRAT" | party == "REPUBLICAN") |> 
   mutate(decade = paste0((year - year %% 10), "s"),
-         party_binary = ifelse(party == "DEMOCRAT", 0, 1))  |> 
-  seelect 
+         party_binary = ifelse(party == "DEMOCRAT", 1, 0)) |> 
+  left_join(minimum_wage, by = c("year", "state")) |> 
+  group_by(year, state) |> 
+  mutate(party_state_avaerage = mean(party_binary))
 ```
+
+```{r}
+state_column_list = c("year", "decade", "state", "state_abbreviation",
+                      "regions", "district", "party", "party_binary",
+                      "employment_count", "union_employment_count",
+                      "collective_bargain_employment_count", "percent_union",
+                      "percent_collective_bargain", "state_min_wage",
+                      "state_min_wage_2020_adj", "fed_min_wage",
+                      "fed_min_wage_2020_adj", "effective_min_wage",
+                      "effective_min_wage_2020_adj", "CPI_avg")
+full_state_data <- full_state_data[, state_column_list]
+```
+
+```{r}
+range(full_state_data$year)
+```
+
+#### National Dataframes
+
+```{r}
+full_ntl_data <- income_distribution |> 
+  left_join(union_wages, by = "year")
+```
+```{r}
+range(full_ntl_data$year)
+```
+
+
+
 
 ### EDA
 
-```{r}
-full_data |> 
-  ggplot(aes(x = year, y = p_covered, color = regions)) +
-  geom_point() +
-  geom_smooth()
-```
 
-```{r}
-full_data |> 
-  ggplot(aes(x = party, y = p_members)) +
-  geom_boxplot() +
-  facet_wrap(vars(decade))
-```
-
-```{r}
-t.test(p_members ~ party, data = full_data, conf.level = .9)
-```
-
-```{r}
-full_data_after_2008 <- full_data |> 
-  filter(year > 2008)
-t.test(p_members ~ party, data = full_data_after_2008, conf.level = .9)
-```
 
 ## Modeling
 
-```{r}
-model <- glm(party_binary ~ p_members, family = "binomial", data = full_data)
-summary(model)
-```
 
 ## Conclusion
