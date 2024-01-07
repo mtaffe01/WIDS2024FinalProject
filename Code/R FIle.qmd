@@ -23,17 +23,14 @@ library(tidyverse)
 
 ```{r}
 # Union Data
-tuesdata <- tidytuesdayR::tt_load(2023, week = 36)
 
-union_demographics <- tuesdata$demographics
-union_wages <- tuesdata$wages
-union_states <- tuesdata$states
+union_demographics <- read_rds("../Data/union_demographics.rds")
+union_wages <- read_rds("../Data/union_wages.rds")
+union_states <- read_rds("../Data/union_states.rds")
 
 
 # Election Data
-tuesdata <- tidytuesdayR::tt_load(2023, week = 45)
-
-house <- tuesdata$house
+house <- read_rds("../Data/house.rds")
 
 # Wage Data
 tuesdata <- tidytuesdayR::tt_load(2021, week = 7)
@@ -102,12 +99,13 @@ house <- house |>
 The states data set has five entries for each year for each of the five `sectors`. For this project we will use the `total` sector. A decades column will also be added.
 
 ```{r}
-full_data <- states |> 
+full_data <- union_states |> 
   filter(sector == "Total") |> 
   left_join(house, by = c("year", "state")) |> 
   filter(party == "DEMOCRAT" | party == "REPUBLICAN") |> 
   mutate(decade = paste0((year - year %% 10), "s"),
-         party_binary = ifelse(party == "DEMOCRAT", 0, 1)) 
+         party_binary = ifelse(party == "DEMOCRAT", 0, 1))  |> 
+  seelect 
 ```
 
 ### EDA
