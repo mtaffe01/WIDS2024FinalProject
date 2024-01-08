@@ -1,5 +1,6 @@
 ---
-title: "testibng"
+title: "WIDS 2024 Final Project"
+author: "Michael Taffe, Melanie Klein, Ramiro Arevalo"
 format: html
 editor: visual
 ---
@@ -43,6 +44,7 @@ minimum_wage <- read_csv("../Data/minimum_wage_data.csv")
 First, lets get an idea of what our data looks like.
 
 ```{r}
+# look at columns
 head(union_wages)
 head(union_states)
 head(house)
@@ -54,10 +56,10 @@ From the head() function we can already see some tidying that needs to be done, 
 
 Next we will look at a quick summary of the data to find very obvious trends.
 
-
 From the summary, we can see the demographics has most of its variables skewed. This will be examined in closer detail in the exploratory data analysis. only two columns have NA values and each of those columns NA values represent less than 10% of the data. There is not an immediate cause to take action on these NA values, although they will be examined in greater detail in the EDA.
 
 ```{r}
+# look for NAs and skews
 summary(union_wages)
 ```
 
@@ -81,16 +83,20 @@ From a quick look at the shapes and distribution of the tables, the house table 
 
 ```{r}
 house <- house |>
-  group_by(year, state, district) |> 
-  filter(candidatevotes == max(candidatevotes)) |> 
+  group_by(year, state, district) |> # group for next line
+  filter(candidatevotes == max(candidatevotes)) |> #only include candidates that won
   ungroup() |> 
   mutate(state = str_to_sentence(state)) |> # change from all caps to sentence case) 
   select(!(state_fips:office)) |> #Remove unwanted columns
   select(!(stage:candidate)) |> 
   select(!(writein:fusion_ticket)) |> 
-  rename(state_abbreviation = state_po)
+  rename(state_abbreviation = state_po) |>  # rename state abbreviation column
+  mutate(party = case_when(
+    str_detect(party, "DEMOCRAT") ~ "DEMOCRAT",
+    str_detect(party, "REPUBLICAN") ~ "REUBLICAN",
+    str_detect(party, "INDEPENDENT") ~ "INDEPENDENT"
+  )) # Recode of party variable
 ```
-
 
 ```{r}
 union_wages <- union_wages |> 
@@ -103,32 +109,34 @@ union_wages <- union_wages |>
   mutate(union_type = facet, .keep = "unused")
 ```
 
+
 ```{r}
 union_states <- union_states |> 
   select(-state_census_code,
-         -observations) |> 
-  mutate(employment_count = employment * 1000, .keep = "unused") |> 
+         -observations) |> # remove unwanted columns
+  mutate(employment_count = employment * 1000, .keep = "unused") |> # column measured in 1000s, this fixes it
   mutate(union_employment_count = members * 1000, .keep = "unused") |> 
-  mutate(collective_bargain_employment_count = covered * 1000, .keep = "unused") |> 
+  mutate(collective_bargain_employment_count = covered * 1000,
+         .keep = "unused") |> 
   rename(
     percent_union = p_members,
     percent_collective_bargain = p_covered
-  )
+  ) #renamed columns
 ```
 
 ```{r}
 income_distribution <- income_distribution |> 
-  select(-number) |> 
+  select(-number) |> # removing unwanted columns
   select(!ends_with("moe")) |> 
   select(year:income_mean) |> 
-  distinct(year, race, income_median, income_mean, .keep_all = TRUE) |> 
+  distinct(year, race, income_median, income_mean, .keep_all = TRUE) |> # only include one line per year. needed bc of multiple sectors that are not being used in data analysis
   rename(median_income = income_median,
-         mean_income = income_mean)
+         mean_income = income_mean) # renaming columns
 ```
 
 ```{r}
 minimum_wage <- minimum_wage |> 
-  select(Year:CPI.Average) |> 
+  select(Year:CPI.Average) |> # selecting relevant columns
   rename(year = Year,
          state = State,
          state_min_wage = State.Minimum.Wage,
@@ -138,17 +146,26 @@ minimum_wage <- minimum_wage |>
          effective_min_wage = Effective.Minimum.Wage,
          effective_min_wage_2020_adj = Effective.Minimum.Wage.2020.Dollars,
          CPI_avg = CPI.Average
-  )
+  ) |> # renaming variables
+  filter(!state %in% c("U.S. Virgin Islands", "Puerto Rico", "Guam")) |>  # remove territory
+  mutate(state_abbreviation = 
+           ifelse(is.na(state.abb[match(state, state.name)]),
+                  "DC",
+                  state.abb[match(state, state.name)]),
+         .keep = "unused", .after = year) # replaces state with state abbreviation, NA values coded as DC as DC is the only NA value 
 ```
 
 ```{r}
+# seeing what we have left
 head(union_wages)
 head(union_states)
 head(house)
 head(income_distribution)
 head(minimum_wage)
 ```
+
 ```{r}
+# seeing what years we have
 range(union_wages$year) #ntl
 range(union_states$year) # state
 range(house$year) # state
@@ -160,21 +177,22 @@ range(minimum_wage$year) # state
 
 The states data set has five entries for each year for each of the five `sectors`. For this project we will use the `total` sector. A decades column will also be added.
 
-
 #### State Dataframes
+
 ```{r}
 full_state_data <- union_states |> 
   filter(sector == "Total") |> 
   select(-sector,
          -state) |> 
   left_join(house, by = c("year", "state_abbreviation")) |> 
-  filter(party == "DEMOCRAT" | party == "REPUBLICAN") |> 
   mutate(decade = paste0((year - year %% 10), "s"),
          party_binary = ifelse(party == "DEMOCRAT", 1, 0)) |> 
-  left_join(minimum_wage, by = c("year", "state")) |> 
+  left_join(minimum_wage, by = c("year", "state_abbreviation")) |> 
   group_by(year, state) |> 
   mutate(party_state_avaerage = mean(party_binary)) |>
-  ungroup()
+  ungroup() |> 
+  mutate(state = state.name[match(state_abbreviation, state.abb)], # fix state encoding
+         regions = state.region[match(state_abbreviation, state.abb)]) # fix region encoding
 ```
 
 ```{r}
@@ -186,7 +204,10 @@ state_column_list = c("year", "decade", "state", "state_abbreviation",
                       "state_min_wage_2020_adj", "fed_min_wage",
                       "fed_min_wage_2020_adj", "effective_min_wage",
                       "effective_min_wage_2020_adj", "CPI_avg")
-full_state_data <- full_state_data[, state_column_list]
+full_state_data <- full_state_data[, state_column_list] # reorder columns
+full_state_data$party[is.na(full_state_data$party)] <- "No election" # replace party NAs
+full_state_data$district[is.na(full_state_data$district)] <- "No election" # replace district NAs
+full_state_data$party_binary[is.na(full_state_data$party_binary)] <- "No election" # replace district NAs
 ```
 
 ```{r}
@@ -194,10 +215,10 @@ range(full_state_data$year)
 ```
 
 ```{r}
-full_state_data %>% 
-  ungroup %>% 
-  count(year)
+summary(full_state_data)
 ```
+
+
 
 #### National Dataframes
 
@@ -211,7 +232,6 @@ state_to_ntl <- full_state_data |>
 #  select(year:adjusted_wage_prop)
 ```
 
-
 ```{r}
 full_ntl_data <- income_distribution |> 
   left_join(union_wages, by = "year") |>
@@ -222,9 +242,6 @@ full_ntl_data <- income_distribution |>
 range(full_ntl_data$year)
 ```
 
-
-
-
 ### EDA
 
 ```{r}
@@ -234,10 +251,6 @@ summary(full_state_data)
 
 #### Graphing Full State Data
 
-
-
-
 ## Modeling
-
 
 ## Conclusion
