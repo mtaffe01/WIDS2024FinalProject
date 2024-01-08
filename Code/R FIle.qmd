@@ -146,7 +146,13 @@ minimum_wage <- minimum_wage |>
          effective_min_wage = Effective.Minimum.Wage,
          effective_min_wage_2020_adj = Effective.Minimum.Wage.2020.Dollars,
          CPI_avg = CPI.Average
-  ) # renaming variables
+  ) |> # renaming variables
+  filter(!state %in% c("U.S. Virgin Islands", "Puerto Rico", "Guam")) |>  # remove territory
+  mutate(state_abbreviation = 
+           ifelse(is.na(state.abb[match(state, state.name)]),
+                  "DC",
+                  state.abb[match(state, state.name)]),
+         .keep = "unused", .after = year) # replaces state with state abbreviation, NA values coded as DC as DC is the only NA value 
 ```
 
 ```{r}
@@ -181,21 +187,13 @@ full_state_data <- union_states |>
   left_join(house, by = c("year", "state_abbreviation")) |> 
   mutate(decade = paste0((year - year %% 10), "s"),
          party_binary = ifelse(party == "DEMOCRAT", 1, 0)) |> 
-  left_join(minimum_wage, by = c("year", "state")) |> 
+  left_join(minimum_wage, by = c("year", "state_abbreviation")) |> 
   group_by(year, state) |> 
   mutate(party_state_avaerage = mean(party_binary)) |>
-  ungroup()
+  ungroup() |> 
+  mutate(state = state.name[match(state_abbreviation, state.abb)], # fix state encoding
+         regions = state.region[match(state_abbreviation, state.abb)]) # fix region encoding
 ```
-
-```{r}
-union_states |> 
-  filter(sector == "Total") |> 
-  select(-sector,
-         -state) |> 
-  left_join(house, by = c("year", "state_abbreviation")) |> 
-  count(year)
-```
-
 
 ```{r}
 state_column_list = c("year", "decade", "state", "state_abbreviation",
@@ -206,30 +204,21 @@ state_column_list = c("year", "decade", "state", "state_abbreviation",
                       "state_min_wage_2020_adj", "fed_min_wage",
                       "fed_min_wage_2020_adj", "effective_min_wage",
                       "effective_min_wage_2020_adj", "CPI_avg")
-full_state_data <- full_state_data[, state_column_list]
+full_state_data <- full_state_data[, state_column_list] # reorder columns
+full_state_data$party[is.na(full_state_data$party)] <- "No election" # replace party NAs
+full_state_data$district[is.na(full_state_data$district)] <- "No election" # replace district NAs
+full_state_data$party_binary[is.na(full_state_data$party_binary)] <- "No election" # replace district NAs
 ```
-
-
-```{r}
-union_states |> 
-  filter(sector == "Total") |> 
-  select(-sector,
-         -state) |> 
-  left_join(house, by = c("year", "state_abbreviation")) |> 
-  filter(party == "DEMOCRAT" | party == "REPUBLICAN" | party == "FOGLIETTA (DEMOCRAT)") |>
-  count(year)
-```
-
 
 ```{r}
 range(full_state_data$year)
 ```
 
 ```{r}
-full_state_data %>% 
-  ungroup %>% 
-  count(year)
+summary(full_state_data)
 ```
+
+
 
 #### National Dataframes
 
