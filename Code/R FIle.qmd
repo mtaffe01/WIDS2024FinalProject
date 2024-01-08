@@ -1,5 +1,6 @@
 ---
-title: "testibng"
+title: "WIDS 2024 Final Project"
+author: "Michael Taffe, Melanie Klein, Ramiro Arevalo"
 format: html
 editor: visual
 ---
@@ -54,7 +55,6 @@ From the head() function we can already see some tidying that needs to be done, 
 
 Next we will look at a quick summary of the data to find very obvious trends.
 
-
 From the summary, we can see the demographics has most of its variables skewed. This will be examined in closer detail in the exploratory data analysis. only two columns have NA values and each of those columns NA values represent less than 10% of the data. There is not an immediate cause to take action on these NA values, although they will be examined in greater detail in the EDA.
 
 ```{r}
@@ -90,7 +90,6 @@ house <- house |>
   select(!(writein:fusion_ticket)) |> 
   rename(state_abbreviation = state_po)
 ```
-
 
 ```{r}
 union_wages <- union_wages |> 
@@ -148,6 +147,7 @@ head(house)
 head(income_distribution)
 head(minimum_wage)
 ```
+
 ```{r}
 range(union_wages$year) #ntl
 range(union_states$year) # state
@@ -160,8 +160,8 @@ range(minimum_wage$year) # state
 
 The states data set has five entries for each year for each of the five `sectors`. For this project we will use the `total` sector. A decades column will also be added.
 
-
 #### State Dataframes
+
 ```{r}
 full_state_data <- union_states |> 
   filter(sector == "Total") |> 
@@ -211,7 +211,6 @@ state_to_ntl <- full_state_data |>
 #  select(year:adjusted_wage_prop)
 ```
 
-
 ```{r}
 full_ntl_data <- income_distribution |> 
   left_join(union_wages, by = "year") |>
@@ -222,9 +221,6 @@ full_ntl_data <- income_distribution |>
 range(full_ntl_data$year)
 ```
 
-
-
-
 ### EDA
 
 ```{r}
@@ -234,10 +230,6 @@ summary(full_state_data)
 
 #### Graphing Full State Data
 
-
-
-
 ## Modeling
-
 
 ## Conclusion
