@@ -166,14 +166,15 @@ The states data set has five entries for each year for each of the five `sectors
 full_state_data <- union_states |> 
   filter(sector == "Total") |> 
   select(-sector,
-         -state_abbreviation) |> 
-  left_join(house, by = c("year", "state")) |> 
+         -state) |> 
+  left_join(house, by = c("year", "state_abbreviation")) |> 
   filter(party == "DEMOCRAT" | party == "REPUBLICAN") |> 
   mutate(decade = paste0((year - year %% 10), "s"),
          party_binary = ifelse(party == "DEMOCRAT", 1, 0)) |> 
   left_join(minimum_wage, by = c("year", "state")) |> 
   group_by(year, state) |> 
-  mutate(party_state_avaerage = mean(party_binary))
+  mutate(party_state_avaerage = mean(party_binary)) |>
+  ungroup()
 ```
 
 ```{r}
@@ -192,12 +193,31 @@ full_state_data <- full_state_data[, state_column_list]
 range(full_state_data$year)
 ```
 
+```{r}
+full_state_data %>% 
+  ungroup %>% 
+  count(year)
+```
+
 #### National Dataframes
+
+##### Creating Adjusted Wages Columns
+
+```{r}
+state_to_ntl <- full_state_data |>
+  ungroup() %>% 
+  mutate(adjusted_wage_prop = fed_min_wage / fed_min_wage_2020_adj, .after = year) |>
+  distinct(year, .keep = TRUE) 
+#  select(year:adjusted_wage_prop)
+```
+
 
 ```{r}
 full_ntl_data <- income_distribution |> 
-  left_join(union_wages, by = "year")
+  left_join(union_wages, by = "year") |>
+  mutate(decade = paste0((year - year %% 10), "s"), .after = year)
 ```
+
 ```{r}
 range(full_ntl_data$year)
 ```
@@ -206,6 +226,14 @@ range(full_ntl_data$year)
 
 
 ### EDA
+
+```{r}
+summary(full_ntl_data)
+summary(full_state_data)
+```
+
+#### Graphing Full State Data
+
 
 
 
