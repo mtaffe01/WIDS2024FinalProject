@@ -261,6 +261,8 @@ library(gifski)
 library(transformr)
 ```
 
+
+
 ```{r}
 map_data <- full_state_data |> 
   select(c("year", "state", "state_abbreviation", "party_state_avaerage")) |> 
@@ -286,60 +288,37 @@ plot_usmap(data = map_data, values = "party_state_avaerage", color = "black") +
 
 
 ```{r}
-state_minimum_wage_data <- full_state_data |> 
-  filter(!is.na(regions)) |>
-  filter(year <=2020 ) |> 
+state_minimum_wage_data <- full_state_data |> # This object will be used to create the graph and also in the data subset
+  filter(!is.na(regions)) |> #This just removes DC
+  filter(year <=2020 ) |>  #wage data only exists before 2020
   mutate(
     map_color = case_when(
-      state_abbreviation == "CA" ~ "CA",
+      state_abbreviation == "CA" ~ "CA", # States we would like to highlight. first "" is the state abb, second "" is what will appear in legend
       state_abbreviation == "AK" ~ "AK",
       state_abbreviation == "OK" ~ "OK",
       state_abbreviation == "FL" ~ "FL",
       .default = NA
     )
   ) 
-state_minimum_wage_data |> 
+state_minimum_wage_data |> # use created table here
   ggplot(aes(x = year)) +
   geom_line(aes(y = state_min_wage_2020_adj, group = state_abbreviation),
-            color = "grey75", alpha =0.6) +
-  geom_line(data = subset(state_minimum_wage_data, !is.na(map_color)),
+            color = "grey75", alpha =0.6) + # using group means the groupings wont appear in legend
+  geom_line(data = subset(state_minimum_wage_data, # use created object here
+                          !is.na(map_color)), #subset used to keep out non highlighted states
             aes(y = state_min_wage_2020_adj, color = map_color),
             linewidth = .75) +
-  geom_line(aes(y = fed_min_wage), color = "red", linewidth = .75) +
+  geom_line(aes(y = fed_min_wage), color = "red", linewidth = .75) + # federal minimum wage
   theme_minimal() +
   labs(title = "State Minimum Wage by Year (Adjusted for 2020 $)",
        subtitle = "For states with an adjusted effective minimum wage above the federal level",
        x = "Year",
        y = "Minimum wage (2020 USD)")
+
+rm(state_minimum_wage_data) # remove object to make graph
 ```
 
 
-```{r}
-# abbreviation and decade
-ggplot(full_state_data, aes(x = state_abbreviation)) +
-  geom_point(aes(y = state_min_wage)) +
-  geom_hline(aes(yintercept = fed_min_wage), color = "red") +
-  facet_wrap(~decade, nrow = 5) +
-  theme(axis.text.x = element_text(angle=90)) +
-  labs(x = "State", 
-       y = "State Minimum Wage")
-
-# region and decade
-ggplot(full_state_data, aes(x = regions)) +
-  geom_point(aes(y = state_min_wage)) +
-  geom_hline(aes(yintercept = fed_min_wage), color = "red") +
-  facet_wrap(~decade, nrow = 5) +
-  labs(x = "State", 
-       y = "State Minimum Wage")
-
-# region and year
-ggplot(full_state_data, aes(x = regions)) +
-  geom_point(aes(y = state_min_wage)) +
-  geom_hline(aes(yintercept = fed_min_wage), color = "red") +
-  facet_wrap(~year, nrow = 10) +
-  labs(x = "State", 
-       y = "State Minimum Wage")
-```
 
 ##### Adjusted Min Wage by state and year (include adjusted fed (facet or use by decades where necessary)
 
@@ -375,34 +354,10 @@ effective_minimum_wage_data |>
        subtitle = "For states with an adjusted effective minimum wage above the federal level",
        x = "Year",
        y = "Effective minimum wage (2020 USD)")
+
+rm(effective_minimum_wage_data)
 ```
 
-```{r}
-# abbreviation and decade
-ggplot(full_state_data, aes(x = state_abbreviation)) +
-  geom_point(aes(y = state_min_wage_2020_adj)) +
-  geom_hline(aes(yintercept = fed_min_wage_2020_adj), color = "red") +
-  facet_wrap(~decade, nrow = 5) +
-  theme(axis.text.x = element_text(angle=90)) +
-  labs(x = "State", 
-       y = "State Minimum Wage in 2020 Dollars")
-
-# region and decade
-ggplot(full_state_data, aes(x = regions)) +
-  geom_point(aes(y = state_min_wage_2020_adj)) +
-  geom_hline(aes(yintercept = fed_min_wage_2020_adj), color = "red") +
-  facet_wrap(~decade, nrow = 5) +
-  labs(x = "Region", 
-       y = "State Minimum Wage in 2020 Dollars")
-
-# region and year
-ggplot(full_state_data, aes(x = regions)) +
-  geom_point(aes(y = state_min_wage_2020_adj)) +
-  geom_hline(aes(yintercept = fed_min_wage_2020_adj), color = "red") +
-  facet_wrap(~year, nrow = 10) +
-  labs(x = "Region", 
-       y = "State Minimum Wage in 2020 Dollars")
-```
 
 ##### Union employment, CB employment, and full employment (facet by decade)
 
@@ -412,25 +367,6 @@ ggplot(full_state_data, aes(x = regions)) +
 
 # fix spacing because union employment count is not visible
 
-```{r}
-# state and decade
-ggplot(full_state_data, aes(x = state_abbreviation)) +
-  geom_point(aes(y = employment_count), color = "red") +
-  geom_point(aes(y = union_employment_count), color = "blue") +
-  geom_point(aes(y = collective_bargain_employment_count), color = "green") +
-  facet_wrap(~decade, nrow = 5) +
-  labs(x = "State", 
-       y = "Number of People Employed")
-
-# region and decade
-ggplot(full_state_data, aes(x = regions)) +
-  geom_point(aes(y = employment_count), color = "red") +
-  geom_point(aes(y = union_employment_count), color = "blue") +
-  geom_point(aes(y = collective_bargain_employment_count), color = "green") +
-  facet_wrap(~decade, nrow = 5) +
-  labs(x = "Region", 
-       y = "Number of People Employed")
-```
 
 ##### percent union and percent collective bargaining
 
@@ -439,22 +375,64 @@ ggplot(full_state_data, aes(x = regions)) +
 # add a key for the color of the points
 
 ```{r}
-# state and decade
-ggplot(full_state_data, aes(x = state_abbreviation)) +
-  geom_point(aes(y = percent_union), color = "red") +
-  geom_point(aes(y = percent_collective_bargain), color = "blue") +
-  facet_wrap(~decade, nrow = 5) +
-  labs(x = "State", 
-       y = "Number of People Employed")
+per_union_wage_data <- full_state_data |> # This object will be used to create the graph and also in the data subset
+  filter(!is.na(regions)) |> #This just removes DC
+  filter(year <=2020 ) |>  #wage data only exists before 2020
+  mutate(
+    map_color = case_when(
+      state_abbreviation == "CA" ~ "CA", # States we would like to highlight. first "" is the state abb, second "" is what will appear in legend
+      state_abbreviation == "AK" ~ "AK",
+      state_abbreviation == "OK" ~ "OK",
+      state_abbreviation == "FL" ~ "FL",
+      .default = NA
+    )
+  ) 
+per_union_wage_data |> # use created table here
+  ggplot(aes(x = year)) +
+  geom_line(aes(y = percent_union, group = state_abbreviation),
+            color = "grey75", alpha =0.6) + # using group means the groupings wont appear in legend
+  geom_line(data = subset(per_union_wage_data, # use created object here
+                          !is.na(map_color)), #subset used to keep out non highlighted states
+            aes(y = percent_union, color = map_color),
+            linewidth = .75) +
+  theme_minimal() +
+  labs(title = "States by % of labor market covered by union",
+       x = "Year",
+       y = "% of labor market in union")
 
-# region and decade
-ggplot(full_state_data, aes(x = regions)) +
-  geom_point(aes(y = percent_union), color = "red") +
-  geom_point(aes(y = percent_collective_bargain), color = "blue") +
-  facet_wrap(~decade, nrow = 5) +
-  labs(x = "Region", 
-       y = "Number of People Employed")
+rm(per_union_wage_data)
 ```
+```{r}
+per_collective_wage_data <- full_state_data |> # This object will be used to create the graph and also in the data subset
+  filter(!is.na(regions)) |> #This just removes DC
+  filter(year <=2020 ) |>  #wage data only exists before 2020
+  mutate(
+    map_color = case_when(
+      state_abbreviation == "CA" ~ "CA", # States we would like to highlight. first "" is the state abb, second "" is what will appear in legend
+      state_abbreviation == "AK" ~ "AK",
+      state_abbreviation == "HI" ~ "HI",
+      state_abbreviation == "FL" ~ "FL",
+      .default = NA
+    )
+  ) 
+per_collective_wage_data |> # use created table here
+  ggplot(aes(x = year)) +
+  geom_line(aes(y = percent_collective_bargain, group = state_abbreviation),
+            color = "grey75", alpha =0.6) + # using group means the groupings wont appear in legend
+  geom_line(data = subset(per_collective_wage_data, # use created object here
+                          !is.na(map_color)), #subset used to keep out non highlighted states
+            aes(y = percent_collective_bargain, color = map_color),
+            linewidth = .75) +
+  theme_minimal() +
+  labs(title = "States by % of labor market covered by collective Bargaining Agreement",
+       x = "Year",
+       y = "% of labor market in union")
+
+rm(per_collective_wage_data)
+```
+
+
+
 
 ## Modeling
 
