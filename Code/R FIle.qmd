@@ -189,7 +189,7 @@ full_state_data <- union_states |>
          party_binary = ifelse(party == "DEMOCRAT", 1, 0)) |> 
   left_join(minimum_wage, by = c("year", "state_abbreviation")) |> 
   group_by(year, state) |> 
-  mutate(party_state_avaerage = mean(party_binary)) |>
+  mutate(party_state_average = mean(party_binary)) |>
   ungroup() |> 
   mutate(state = state.name[match(state_abbreviation, state.abb)], # fix state encoding
          regions = state.region[match(state_abbreviation, state.abb)]) # fix region encoding
@@ -198,6 +198,7 @@ full_state_data <- union_states |>
 ```{r}
 state_column_list = c("year", "decade", "state", "state_abbreviation",
                       "regions", "district", "party", "party_binary",
+                      "party_state_average",
                       "employment_count", "union_employment_count",
                       "collective_bargain_employment_count", "percent_union",
                       "percent_collective_bargain", "state_min_wage",
@@ -268,10 +269,10 @@ map_data <- full_state_data |>
   select(c("year", "state", "state_abbreviation", "party_state_average")) |> 
   distinct(year, state, .keep_all = TRUE) |> 
   filter(year %% 4==0) |> 
-  filter(!is.na(party_state_avaerage))
+  filter(!is.na(party_state_average))
 
 
-plot_usmap(data = map_data, values = "party_state_avaerage", color = "black") +
+plot_usmap(data = map_data, values = "party_state_average", color = "black") +
   facet_wrap(~year, nrow = 2, ncol= 6) +
   theme(legend.position = "top") +
   scale_fill_gradient(low = "red", high = "blue")
