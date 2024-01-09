@@ -321,7 +321,7 @@ ggplot(full_state_data, aes(x = regions)) +
 
 ##### Union employment, CB employment, and full employment (facet by decade)
 # should we take the average value per decade?
-# add labels for each type of employment
+# add a key for the color of the points
 # fix spacing because union employment count is not visible
 ```{r}
 # state and decade
@@ -344,8 +344,24 @@ ggplot(full_state_data, aes(x = regions)) +
 ```
 
 ##### percent union and percent collective bargaining
+# should we take the average value per decade?
+# add a key for the color of the points
 ```{r}
+# state and decade
+ggplot(full_state_data, aes(x = state_abbreviation)) +
+  geom_point(aes(y = percent_union), color = "red") +
+  geom_point(aes(y = percent_collective_bargain), color = "blue") +
+  facet_wrap(~decade, nrow = 5) +
+  labs(x = "State", 
+       y = "Number of People Employed")
 
+# region and decade
+ggplot(full_state_data, aes(x = regions)) +
+  geom_point(aes(y = percent_union), color = "red") +
+  geom_point(aes(y = percent_collective_bargain), color = "blue") +
+  facet_wrap(~decade, nrow = 5) +
+  labs(x = "Region", 
+       y = "Number of People Employed")
 ```
 
 
