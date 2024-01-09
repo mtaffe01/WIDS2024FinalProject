@@ -250,10 +250,6 @@ summary(full_state_data)
 
 #### Graphing Full State Data
 
-* For facets, use best judgement if by state, decade, year, or region
-
-* maybe make all states light grey and just choose outline outlier states and maybe regional averages
-
 ##### Party by state and year
 
 ```{r}
@@ -282,12 +278,6 @@ plot_usmap(data = map_data, values = "party_state_average", color = "black") +
 
 
 ##### Min Wage by state and year (include fed (facet or use by decades where necessary)
-
-# figure out spacing of graph
-
-# can't do a line for federal minimum wage unless faceted by year instead of decade
-
-
 ```{r}
 state_minimum_wage_data <- full_state_data |> # This object will be used to create the graph and also in the data subset
   filter(!is.na(regions)) |> #This just removes DC
@@ -322,13 +312,6 @@ rm(state_minimum_wage_data) # remove object to make graph
 
 
 ##### Adjusted Min Wage by state and year (include adjusted fed (facet or use by decades where necessary)
-
-# figure out spacing of graph
-
-# can't do a line for adj federal minimum wage unless faceted by year instead of decade
-
-# add a label for the line saying federal minimum wage
-
 ```{r}
 effective_minimum_wage_data <- full_state_data |> 
   filter(!is.na(regions)) |> 
@@ -362,19 +345,9 @@ rm(effective_minimum_wage_data)
 
 ##### Union employment, CB employment, and full employment (facet by decade)
 
-# should we take the average value per decade?
-
-# add a key for the color of the points
-
-# fix spacing because union employment count is not visible
 
 
 ##### percent union and percent collective bargaining
-
-# should we take the average value per decade?
-
-# add a key for the color of the points
-
 ```{r}
 per_union_wage_data <- full_state_data |> # This object will be used to create the graph and also in the data subset
   filter(!is.na(regions)) |> #This just removes DC
@@ -403,6 +376,7 @@ per_union_wage_data |> # use created table here
 
 rm(per_union_wage_data)
 ```
+
 ```{r}
 per_collective_wage_data <- full_state_data |> # This object will be used to create the graph and also in the data subset
   filter(!is.na(regions)) |> #This just removes DC
