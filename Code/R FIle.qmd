@@ -280,7 +280,7 @@ plot_usmap(data = map_data, values = "party_state_average", color = "black") +
 ```{r}
 state_minimum_wage_data <- full_state_data |> # This object will be used to create the graph and also in the data subset
   filter(!is.na(regions)) |> #This just removes DC
-  filter(year <=2020 ) |>  #wage data only exists before 2020
+  filter(year <=2020 & year >=1984) |>  #wage data only exists before 2020
   mutate(
     map_color = case_when(
       state_abbreviation == "CA" ~ "CA", # States we would like to highlight. first "" is the state abb, second "" is what will appear in legend
@@ -300,6 +300,7 @@ state_minimum_wage_data |> # use created table here
             linewidth = .75) +
   geom_line(aes(y = fed_min_wage), color = "red", linewidth = .75) + # federal minimum wage
   theme_minimal() +
+  scale_x_continuous(breaks = seq(min(state_minimum_wage_data$year), max(state_minimum_wage_data$year), by = 4)) + 
   labs(title = "State Minimum Wage by Year (Adjusted for 2020 $)",
        subtitle = "For states with an adjusted effective minimum wage above the federal level",
        x = "Year",
@@ -315,6 +316,7 @@ rm(state_minimum_wage_data) # remove object to make graph
 effective_minimum_wage_data <- full_state_data |> 
   filter(!is.na(regions)) |> 
   filter(effective_min_wage_2020_adj != fed_min_wage_2020_adj) |> 
+  filter(year <=2020 & year >=1984) |>
   mutate(
     map_color = case_when(
       state_abbreviation == "CA" ~ "CA",
@@ -333,6 +335,7 @@ effective_minimum_wage_data |>
             linewidth = .75) +
   geom_line(aes(y = fed_min_wage), color = "red", linewidth = .75) +
   theme_minimal() +
+  scale_x_continuous(breaks = seq(min(effective_minimum_wage_data$year), max(effective_minimum_wage_data$year), by = 4)) + 
   labs(title = "State Effective Minimum Wage by Year (Adjusted for 2020 $)",
        subtitle = "For states with an adjusted effective minimum wage above the federal level",
        x = "Year",
@@ -350,7 +353,7 @@ rm(effective_minimum_wage_data)
 ```{r}
 per_union_wage_data <- full_state_data |> # This object will be used to create the graph and also in the data subset
   filter(!is.na(regions)) |> #This just removes DC
-  filter(year <=2020 ) |>  #wage data only exists before 2020
+  filter(year <= 2020 & year >= 1984) |>  #wage data only exists before 2020
   mutate(
     map_color = case_when(
       state_abbreviation == "CA" ~ "CA", # States we would like to highlight. first "" is the state abb, second "" is what will appear in legend
@@ -369,6 +372,7 @@ per_union_wage_data |> # use created table here
             aes(y = percent_union, color = map_color),
             linewidth = .75) +
   theme_minimal() +
+  scale_x_continuous(breaks = seq(min(per_union_wage_data$year), max(per_union_wage_data$year), by = 4)) + 
   labs(title = "States by % of labor market covered by union",
        x = "Year",
        y = "% of labor market in union")
@@ -379,7 +383,7 @@ rm(per_union_wage_data)
 ```{r}
 per_collective_wage_data <- full_state_data |> # This object will be used to create the graph and also in the data subset
   filter(!is.na(regions)) |> #This just removes DC
-  filter(year <=2020 ) |>  #wage data only exists before 2020
+  filter(year <= 2020 & year >= 1984) |>  #wage data only exists before 2020
   mutate(
     map_color = case_when(
       state_abbreviation == "CA" ~ "CA", # States we would like to highlight. first "" is the state abb, second "" is what will appear in legend
@@ -398,6 +402,7 @@ per_collective_wage_data |> # use created table here
             aes(y = percent_collective_bargain, color = map_color),
             linewidth = .75) +
   theme_minimal() +
+  scale_x_continuous(breaks = seq(min(per_collective_wage_data$year), max(per_collective_wage_data$year), by = 4)) + 
   labs(title = "States by % of labor market covered by collective Bargaining Agreement",
        x = "Year",
        y = "% of labor market in union")
