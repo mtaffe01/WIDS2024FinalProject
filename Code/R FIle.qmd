@@ -109,7 +109,6 @@ union_wages <- union_wages |>
   mutate(union_type = facet, .keep = "unused")
 ```
 
-
 ```{r}
 union_states <- union_states |> 
   select(-state_census_code,
@@ -218,8 +217,6 @@ range(full_state_data$year)
 summary(full_state_data)
 ```
 
-
-
 #### National Dataframes
 
 ##### Creating Adjusted Wages Columns
@@ -250,17 +247,77 @@ summary(full_state_data)
 ```
 
 #### Graphing Full State Data
+
 ##### For facets, use best judgement if by state, decade, year, or region
+
 ##### maybe make all states light grey and just choose outline outlier states and maybe regional averages
 
 ##### Party by state and year
+
 ```{r}
 ggplot(full_state_data, aes(x = state_abbreviation, y = )) +
 ```
 
 ##### Min Wage by state and year (include fed (facet or use by decades where necessary)
+
 # figure out spacing of graph
+
 # can't do a line for federal minimum wage unless faceted by year instead of decade
+
+```{r}
+effective_min_wage_adj_graph1 <- full_state_data |> 
+  filter(!is.na(regions)) |> 
+  filter(effective_min_wage_2020_adj != fed_min_wage_2020_adj) |> 
+  filter(state_abbreviation != "HI") |> 
+  ggplot(aes(x = year)) +
+  geom_line(aes(y = effective_min_wage_2020_adj, color = state_abbreviation)) +
+  scale_color_manual(values = c(rep("gray", 34))) +
+  geom_line(aes(y = fed_min_wage), color = "red", linewidth = .75) 
+
+HI_effective_min_wage <- full_state_data |> 
+  filter(!is.na(regions)) |> 
+  filter(effective_min_wage_2020_adj != fed_min_wage_2020_adj) |> 
+  filter(state_abbreviation == "HI") |> 
+  mutate(effective_min_wage_2020_adj = effective_min_wage_2020_adj - .05)
+
+CT_effective_min_wage <- full_state_data |> 
+  filter(!is.na(regions)) |> 
+  filter(effective_min_wage_2020_adj != fed_min_wage_2020_adj) |> 
+  filter(state_abbreviation == "CT")
+
+AK_effective_min_wage <- full_state_data |> 
+  filter(!is.na(regions)) |> 
+  filter(effective_min_wage_2020_adj != fed_min_wage_2020_adj) |> 
+  filter(state_abbreviation == "AK")
+
+CA_effective_min_wage <- full_state_data |> 
+  filter(!is.na(regions)) |> 
+  filter(effective_min_wage_2020_adj != fed_min_wage_2020_adj) |> 
+  filter(state_abbreviation == "CA")
+  
+
+effective_min_wage_adj_graph1 +
+  geom_line(data = HI_effective_min_wage, aes(y = effective_min_wage_2020_adj), color = "blue",linewidth = .7) +
+  annotate("text", x=1994, y=9.5, label= "Hawaii", color = "blue") +
+  geom_line(data = CT_effective_min_wage, aes(y = effective_min_wage_2020_adj), color = "#288225", linewidth = .7) +
+  annotate("text", x=1985, y=7.5, label= "Connecticut", color = "#288225") +
+  geom_line(data = AK_effective_min_wage, aes(y = effective_min_wage_2020_adj), color = "orange", linewidth = .7) +
+  annotate("text", x=1985, y=10, label= "Alaska", color = "orange") +
+  geom_line(data = CA_effective_min_wage, aes(y = effective_min_wage_2020_adj), color = "purple", linewidth = .7) +
+  annotate("text", x=2016, y=12, label= "California", color = "purple") +
+  annotate("text", x=2000, y=5.5, label= "Federal", color = "red") +
+  theme_minimal() +
+  theme(legend.position = "none") +
+  labs(title = "State effective minimum wage by Year (adjusted for 2020 $)",
+       subtitle = "For states with an adjusted effective minimum wage above the federal level",
+       x = "Year",
+       y = "Effective minimum wage (2020 USD)")
+
+rm(HI_effective_min_wage, CT_effective_min_wage,
+   AK_effective_min_wage, CA_effective_min_wage)
+```
+
+
 ```{r}
 # abbreviation and decade
 ggplot(full_state_data, aes(x = state_abbreviation)) +
@@ -289,9 +346,13 @@ ggplot(full_state_data, aes(x = regions)) +
 ```
 
 ##### Adjusted Min Wage by state and year (include adjusted fed (facet or use by decades where necessary)
+
 # figure out spacing of graph
+
 # can't do a line for adj federal minimum wage unless faceted by year instead of decade
+
 # add a label for the line saying federal minimum wage
+
 ```{r}
 # abbreviation and decade
 ggplot(full_state_data, aes(x = state_abbreviation)) +
@@ -320,9 +381,13 @@ ggplot(full_state_data, aes(x = regions)) +
 ```
 
 ##### Union employment, CB employment, and full employment (facet by decade)
+
 # should we take the average value per decade?
+
 # add a key for the color of the points
+
 # fix spacing because union employment count is not visible
+
 ```{r}
 # state and decade
 ggplot(full_state_data, aes(x = state_abbreviation)) +
@@ -344,8 +409,11 @@ ggplot(full_state_data, aes(x = regions)) +
 ```
 
 ##### percent union and percent collective bargaining
+
 # should we take the average value per decade?
+
 # add a key for the color of the points
+
 ```{r}
 # state and decade
 ggplot(full_state_data, aes(x = state_abbreviation)) +
@@ -363,9 +431,6 @@ ggplot(full_state_data, aes(x = regions)) +
   labs(x = "Region", 
        y = "Number of People Employed")
 ```
-
-
-
 
 ## Modeling
 
