@@ -254,10 +254,116 @@ summary(full_state_data)
 ##### maybe make all states light grey and just choose outline outlier states and maybe regional averages
 
 ##### Party by state and year
+```{r}
+ggplot(full_state_data, aes(x = state_abbreviation, y = )) +
+```
+
 ##### Min Wage by state and year (include fed (facet or use by decades where necessary)
+# figure out spacing of graph
+# can't do a line for federal minimum wage unless faceted by year instead of decade
+```{r}
+# abbreviation and decade
+ggplot(full_state_data, aes(x = state_abbreviation)) +
+  geom_point(aes(y = state_min_wage)) +
+  geom_hline(aes(yintercept = fed_min_wage), color = "red") +
+  facet_wrap(~decade, nrow = 5) +
+  theme(axis.text.x = element_text(angle=90)) +
+  labs(x = "State", 
+       y = "State Minimum Wage")
+
+# region and decade
+ggplot(full_state_data, aes(x = regions)) +
+  geom_point(aes(y = state_min_wage)) +
+  geom_hline(aes(yintercept = fed_min_wage), color = "red") +
+  facet_wrap(~decade, nrow = 5) +
+  labs(x = "State", 
+       y = "State Minimum Wage")
+
+# region and year
+ggplot(full_state_data, aes(x = regions)) +
+  geom_point(aes(y = state_min_wage)) +
+  geom_hline(aes(yintercept = fed_min_wage), color = "red") +
+  facet_wrap(~year, nrow = 10) +
+  labs(x = "State", 
+       y = "State Minimum Wage")
+```
+
 ##### Adjusted Min Wage by state and year (include adjusted fed (facet or use by decades where necessary)
+# figure out spacing of graph
+# can't do a line for adj federal minimum wage unless faceted by year instead of decade
+# add a label for the line saying federal minimum wage
+```{r}
+# abbreviation and decade
+ggplot(full_state_data, aes(x = state_abbreviation)) +
+  geom_point(aes(y = state_min_wage_2020_adj)) +
+  geom_hline(aes(yintercept = fed_min_wage_2020_adj), color = "red") +
+  facet_wrap(~decade, nrow = 5) +
+  theme(axis.text.x = element_text(angle=90)) +
+  labs(x = "State", 
+       y = "State Minimum Wage in 2020 Dollars")
+
+# region and decade
+ggplot(full_state_data, aes(x = regions)) +
+  geom_point(aes(y = state_min_wage_2020_adj)) +
+  geom_hline(aes(yintercept = fed_min_wage_2020_adj), color = "red") +
+  facet_wrap(~decade, nrow = 5) +
+  labs(x = "Region", 
+       y = "State Minimum Wage in 2020 Dollars")
+
+# region and year
+ggplot(full_state_data, aes(x = regions)) +
+  geom_point(aes(y = state_min_wage_2020_adj)) +
+  geom_hline(aes(yintercept = fed_min_wage_2020_adj), color = "red") +
+  facet_wrap(~year, nrow = 10) +
+  labs(x = "Region", 
+       y = "State Minimum Wage in 2020 Dollars")
+```
+
 ##### Union employment, CB employment, and full employment (facet by decade)
+# should we take the average value per decade?
+# add a key for the color of the points
+# fix spacing because union employment count is not visible
+```{r}
+# state and decade
+ggplot(full_state_data, aes(x = state_abbreviation)) +
+  geom_point(aes(y = employment_count), color = "red") +
+  geom_point(aes(y = union_employment_count), color = "blue") +
+  geom_point(aes(y = collective_bargain_employment_count), color = "green") +
+  facet_wrap(~decade, nrow = 5) +
+  labs(x = "State", 
+       y = "Number of People Employed")
+
+# region and decade
+ggplot(full_state_data, aes(x = regions)) +
+  geom_point(aes(y = employment_count), color = "red") +
+  geom_point(aes(y = union_employment_count), color = "blue") +
+  geom_point(aes(y = collective_bargain_employment_count), color = "green") +
+  facet_wrap(~decade, nrow = 5) +
+  labs(x = "Region", 
+       y = "Number of People Employed")
+```
+
 ##### percent union and percent collective bargaining
+# should we take the average value per decade?
+# add a key for the color of the points
+```{r}
+# state and decade
+ggplot(full_state_data, aes(x = state_abbreviation)) +
+  geom_point(aes(y = percent_union), color = "red") +
+  geom_point(aes(y = percent_collective_bargain), color = "blue") +
+  facet_wrap(~decade, nrow = 5) +
+  labs(x = "State", 
+       y = "Number of People Employed")
+
+# region and decade
+ggplot(full_state_data, aes(x = regions)) +
+  geom_point(aes(y = percent_union), color = "red") +
+  geom_point(aes(y = percent_collective_bargain), color = "blue") +
+  facet_wrap(~decade, nrow = 5) +
+  labs(x = "Region", 
+       y = "Number of People Employed")
+```
+
 
 
 
