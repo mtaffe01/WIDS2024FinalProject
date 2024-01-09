@@ -17,6 +17,7 @@ test
 
 ```{r}
 library(tidyverse)
+library(usmap)
 ```
 
 ### Gathering Data
@@ -248,15 +249,34 @@ summary(full_state_data)
 
 #### Graphing Full State Data
 
-##### For facets, use best judgement if by state, decade, year, or region
+* For facets, use best judgement if by state, decade, year, or region
 
-##### maybe make all states light grey and just choose outline outlier states and maybe regional averages
+* maybe make all states light grey and just choose outline outlier states and maybe regional averages
 
 ##### Party by state and year
 
 ```{r}
-ggplot(full_state_data, aes(x = state_abbreviation, y = )) +
+library(gganimate)
+library(gifski)
+library(transformr)
 ```
+
+```{r}
+map_data <- full_state_data |> 
+  select(c("year", "state", "state_abbreviation", "party_state_avaerage")) |> 
+  distinct(year, state, .keep_all = TRUE) |> 
+  filter(year %% 4==0) |> 
+  filter(!is.na(party_state_avaerage))
+
+
+plot_usmap(data = map_data, values = "party_state_avaerage", color = "black") +
+  facet_wrap(~year, nrow = 2, ncol= 6) +
+  theme(legend.position = "top") +
+  scale_fill_gradient(low = "red", high = "blue")
+```
+
+
+
 
 ##### Min Wage by state and year (include fed (facet or use by decades where necessary)
 
@@ -264,57 +284,33 @@ ggplot(full_state_data, aes(x = state_abbreviation, y = )) +
 
 # can't do a line for federal minimum wage unless faceted by year instead of decade
 
+
 ```{r}
-effective_min_wage_adj_graph1 <- full_state_data |> 
-  filter(!is.na(regions)) |> 
-  filter(effective_min_wage_2020_adj != fed_min_wage_2020_adj) |> 
-  filter(state_abbreviation != "HI") |> 
+state_minimum_wage_data <- full_state_data |> 
+  filter(!is.na(regions)) |>
+  filter(year <=2020 ) |> 
+  mutate(
+    map_color = case_when(
+      state_abbreviation == "CA" ~ "CA",
+      state_abbreviation == "AK" ~ "AK",
+      state_abbreviation == "OK" ~ "OK",
+      state_abbreviation == "FL" ~ "FL",
+      .default = NA
+    )
+  ) 
+state_minimum_wage_data |> 
   ggplot(aes(x = year)) +
-  geom_line(aes(y = effective_min_wage_2020_adj, color = state_abbreviation)) +
-  scale_color_manual(values = c(rep("gray", 34))) +
-  geom_line(aes(y = fed_min_wage), color = "red", linewidth = .75) 
-
-HI_effective_min_wage <- full_state_data |> 
-  filter(!is.na(regions)) |> 
-  filter(effective_min_wage_2020_adj != fed_min_wage_2020_adj) |> 
-  filter(state_abbreviation == "HI") |> 
-  mutate(effective_min_wage_2020_adj = effective_min_wage_2020_adj - .05)
-
-CT_effective_min_wage <- full_state_data |> 
-  filter(!is.na(regions)) |> 
-  filter(effective_min_wage_2020_adj != fed_min_wage_2020_adj) |> 
-  filter(state_abbreviation == "CT")
-
-AK_effective_min_wage <- full_state_data |> 
-  filter(!is.na(regions)) |> 
-  filter(effective_min_wage_2020_adj != fed_min_wage_2020_adj) |> 
-  filter(state_abbreviation == "AK")
-
-CA_effective_min_wage <- full_state_data |> 
-  filter(!is.na(regions)) |> 
-  filter(effective_min_wage_2020_adj != fed_min_wage_2020_adj) |> 
-  filter(state_abbreviation == "CA")
-  
-
-effective_min_wage_adj_graph1 +
-  geom_line(data = HI_effective_min_wage, aes(y = effective_min_wage_2020_adj), color = "blue",linewidth = .7) +
-  annotate("text", x=1994, y=9.5, label= "Hawaii", color = "blue") +
-  geom_line(data = CT_effective_min_wage, aes(y = effective_min_wage_2020_adj), color = "#288225", linewidth = .7) +
-  annotate("text", x=1985, y=7.5, label= "Connecticut", color = "#288225") +
-  geom_line(data = AK_effective_min_wage, aes(y = effective_min_wage_2020_adj), color = "orange", linewidth = .7) +
-  annotate("text", x=1985, y=10, label= "Alaska", color = "orange") +
-  geom_line(data = CA_effective_min_wage, aes(y = effective_min_wage_2020_adj), color = "purple", linewidth = .7) +
-  annotate("text", x=2016, y=12, label= "California", color = "purple") +
-  annotate("text", x=2000, y=5.5, label= "Federal", color = "red") +
+  geom_line(aes(y = state_min_wage_2020_adj, group = state_abbreviation),
+            color = "grey75", alpha =0.6) +
+  geom_line(data = subset(state_minimum_wage_data, !is.na(map_color)),
+            aes(y = state_min_wage_2020_adj, color = map_color),
+            linewidth = .75) +
+  geom_line(aes(y = fed_min_wage), color = "red", linewidth = .75) +
   theme_minimal() +
-  theme(legend.position = "none") +
-  labs(title = "State effective minimum wage by Year (adjusted for 2020 $)",
+  labs(title = "State Minimum Wage by Year (Adjusted for 2020 $)",
        subtitle = "For states with an adjusted effective minimum wage above the federal level",
        x = "Year",
-       y = "Effective minimum wage (2020 USD)")
-
-rm(HI_effective_min_wage, CT_effective_min_wage,
-   AK_effective_min_wage, CA_effective_min_wage)
+       y = "Minimum wage (2020 USD)")
 ```
 
 
@@ -352,6 +348,34 @@ ggplot(full_state_data, aes(x = regions)) +
 # can't do a line for adj federal minimum wage unless faceted by year instead of decade
 
 # add a label for the line saying federal minimum wage
+
+```{r}
+effective_minimum_wage_data <- full_state_data |> 
+  filter(!is.na(regions)) |> 
+  filter(effective_min_wage_2020_adj != fed_min_wage_2020_adj) |> 
+  mutate(
+    map_color = case_when(
+      state_abbreviation == "CA" ~ "CA",
+      state_abbreviation == "AK" ~ "AK",
+      state_abbreviation == "CT" ~ "CT",
+      state_abbreviation == "HI" ~ "HI",
+      .default = NA
+    )
+  ) 
+effective_minimum_wage_data |> 
+  ggplot(aes(x = year)) +
+  geom_line(aes(y = effective_min_wage_2020_adj, group = state_abbreviation),
+            color = "grey75", alpha =0.6) +
+  geom_line(data = subset(effective_minimum_wage_data, !is.na(map_color)),
+            aes(y = effective_min_wage_2020_adj, color = map_color),
+            linewidth = .75) +
+  geom_line(aes(y = fed_min_wage), color = "red", linewidth = .75) +
+  theme_minimal() +
+  labs(title = "State Effective Minimum Wage by Year (Adjusted for 2020 $)",
+       subtitle = "For states with an adjusted effective minimum wage above the federal level",
+       x = "Year",
+       y = "Effective minimum wage (2020 USD)")
+```
 
 ```{r}
 # abbreviation and decade
