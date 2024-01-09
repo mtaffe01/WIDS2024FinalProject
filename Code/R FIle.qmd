@@ -265,7 +265,7 @@ library(transformr)
 
 ```{r}
 map_data <- full_state_data |> 
-  select(c("year", "state", "state_abbreviation", "party_state_avaerage")) |> 
+  select(c("year", "state", "state_abbreviation", "party_state_average")) |> 
   distinct(year, state, .keep_all = TRUE) |> 
   filter(year %% 4==0) |> 
   filter(!is.na(party_state_avaerage))
