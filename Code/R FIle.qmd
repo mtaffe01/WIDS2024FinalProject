@@ -224,17 +224,31 @@ summary(full_state_data)
 ##### Creating Adjusted Wages Columns
 
 ```{r}
-state_to_ntl <- full_state_data |>
-  ungroup() %>% 
-  mutate(adjusted_wage_prop = fed_min_wage / fed_min_wage_2020_adj, .after = year) |>
-  distinct(year, .keep = TRUE) 
-#  select(year:adjusted_wage_prop)
+state_to_ntl_adjusted <- full_state_data |>
+  mutate(prop_2020_adj = fed_min_wage_2020_adj / fed_min_wage, .after = year) |>
+  distinct(year, .keep_all = TRUE) |>
+  select(year, prop_2020_adj)
+```
+
+```{r}
+state_to_ntl_employment <- full_state_data |>
+  group_by(year) |>
+  summarise_at(vars(employment_count:collective_bargain_employment_count), sum)
 ```
 
 ```{r}
 full_ntl_data <- income_distribution |> 
   left_join(union_wages, by = "year") |>
-  mutate(decade = paste0((year - year %% 10), "s"), .after = year)
+  left_join(state_to_ntl_adjusted, by = "year") |>
+  left_join(state_to_ntl_employment, by = "year") |>
+  mutate(decade = paste0((year - year %% 10), "s"), .after = year) |>
+  mutate(mean_median_income_difference = mean_income - median_income, .after = mean_income) |>
+   mutate(median_income_2020_adj = median_income * prop_2020_adj,
+         mean_income_2020_adj = mean_income * prop_2020_adj,
+         mean_median_income_difference_2020_adj = mean_median_income_difference * prop_2020_adj,
+         wage_2020_adj = wage * prop_2020_adj,
+         union_wage_2020_adj = union_wage * prop_2020_adj,
+         nonunion_wage_2020_adj = nonunion_wage * prop_2020_adj)
 ```
 
 ```{r}
