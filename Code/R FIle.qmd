@@ -7,9 +7,10 @@ editor: visual
 
 # 1. Comparing interactions between collective bargaining rates, wages, and House of Representative elections
 
-** Insert abstract of project, where we got our data, what our data looks like, and other information here
+**Insert abstract of project, where we got our data, what our data looks like, and other information here**
 
-# 2. Data Analysis 
+# 2. Data Analysis
+
 ## 2.1 Getting Set Up
 
 ```{r}
@@ -33,9 +34,10 @@ minimum_wage <- read_csv("../Data/minimum_wage_data.csv",show_col_types = FALSE)
 ```
 
 ## 2.2 Basic Data Cleaning
+
 ### 2.2.1 Examining data shape
 
-Before we do anything to our data, we will examine our data to ensure everything loaded in correctly 
+Before we do anything to our data, we will examine our data to ensure everything loaded in correctly
 
 ```{r}
 head(union_wages)
@@ -275,7 +277,7 @@ range(full_ntl_data$year)
 
 ## 2.3 EDA
 
-For our exploratory data analysis, we will look at interactions between collective bargaining rates, wages, and house election. We will also examine basic distribution 
+For our exploratory data analysis, we will look at interactions between collective bargaining rates, wages, and house election. We will also examine basic distribution.
 
 ### 2.3.1 Collective Bargaining
 
@@ -289,6 +291,7 @@ per_union_wage_data <- full_state_data |> # This object will be used to create t
       state_abbreviation == "AK" ~ "AK",
       state_abbreviation == "OK" ~ "OK",
       state_abbreviation == "FL" ~ "FL",
+      state_abbreviation == "HI" ~ "HI",
       .default = NA
     )
   ) 
@@ -305,12 +308,15 @@ per_union_wage_data |> # use created table here
   annotate("text", x=1988, y=.15, label= "Federal Avg", color = "orange", size = 5) +
   theme_minimal() +
   scale_x_continuous(breaks = seq(min(per_union_wage_data$year), max(per_union_wage_data$year), by = 4)) + 
-  labs(title = "States by % of labor market covered by union",
+  labs(title = "States By % of Labor Market Covered By Union",
        x = "Year",
-       y = "% of labor market in union")
+       y = "% of Labor Market In Union",
+       color = "Selected States")
 
 rm(per_union_wage_data)
 ```
+Our first graph shows what is commonly known about unions in the United States: Union membership has been on the decline since at least the 1980s. Unfortunately our data does not extend to the last two years where some reports indicate union memberships are on the rise. Early on, we can see that southern and more Republican leading states have lower union rates than more democrat and northern / western states. There is a very small bump in membership in 2008, which we hypothesize happened in relation to the 2008 financial crisis.
+
 
 ```{r}
 per_collective_wage_data <- full_state_data |> # This object will be used to create the graph and also in the data subset
@@ -338,13 +344,13 @@ per_collective_wage_data |> # use created table here
   annotate("text", x=1988, y=.17, label= "Federal Avg", color = "orange", size = 5) +
   theme_minimal() +
   scale_x_continuous(breaks = seq(min(per_collective_wage_data$year), max(per_collective_wage_data$year), by = 4)) + 
-  labs(title = "States by % of labor market covered by collective Bargaining Agreement",
+  labs(title = "States by % of Labor Market Covered By a Collective Bargaining Agreement",
        x = "Year",
-       y = "% of labor market in union")
+       y = "% of Labor Market in a Collective Bargaining Agreement")
 
 rm(per_collective_wage_data)
 ```
-
+This graph is almost the same exact as the first, although the rates are slightly higher because this graph includes all collective bargaining agreements.
 
 
 ### 2.3.2 Wages
@@ -370,16 +376,17 @@ state_minimum_wage_data |> # use created table here
                           !is.na(map_color)), #subset used to keep out non highlighted states
             aes(y = state_min_wage_2020_adj, color = map_color),
             linewidth = .75) +
-  geom_line(aes(y = fed_min_wage), color = "red", linewidth = .75) + # federal minimum wage
+  geom_line(aes(y = fed_min_wage_2020_adj), color = "red", linewidth = .75) + # federal minimum wage
   theme_minimal() +
   scale_x_continuous(breaks = seq(min(state_minimum_wage_data$year), max(state_minimum_wage_data$year), by = 4)) + 
   labs(title = "State Minimum Wage by Year (Adjusted for 2020 $)",
        subtitle = "For states with an adjusted effective minimum wage above the federal level",
        x = "Year",
-       y = "Minimum wage (2020 USD)")
+       y = "Minimum Wage (2020 USD)")
 
 rm(state_minimum_wage_data) # remove object to make graph
 ```
+This graph can be used to draw a number of interesting inferences. First, there is a decently dark line at the bottom that indicates a number of states still have no minimum wage. This will be examined in greater detailed in the next graph. Next, we can see tht there is a significan shift post 2016 of raising the minimum wage at the state level. Before that time almost no state had a adjusted minimum wage over $10. Now, there are numerous states that surpass this value. Next, we can see that the federal minimum wage has been slowly losing value due to inflation since it was last raised in 2009.
 
 ```{r}
 effective_minimum_wage_data <- full_state_data |> 
@@ -402,7 +409,7 @@ effective_minimum_wage_data |>
   geom_line(data = subset(effective_minimum_wage_data, !is.na(map_color)),
             aes(y = effective_min_wage_2020_adj, color = map_color),
             linewidth = .75) +
-  geom_line(aes(y = fed_min_wage), color = "red", linewidth = .75) +
+  geom_line(aes(y = fed_min_wage_2020_adj), color = "red", linewidth = .75) +
   theme_minimal() +
   scale_x_continuous(breaks = seq(min(effective_minimum_wage_data$year), max(effective_minimum_wage_data$year), by = 4)) + 
   labs(title = "State Effective Minimum Wage by Year (Adjusted for 2020 $)",
@@ -412,15 +419,40 @@ effective_minimum_wage_data |>
 
 rm(effective_minimum_wage_data)
 ```
+This graph removes all data points where the state minimum wage falls below the federal amount. From this we can see that more and more states are taking it into their own hands to protect workers rights. We can see a large jump in 2007 which may be related to the financial crisis.
+
+
 ```{r}
 full_ntl_data |> 
   filter(year >= 1984) |> 
   ggplot(aes(x = year)) +
   geom_line(aes(y = mean_income_2020_adj), color = "red") +
   geom_line(aes(y = median_income_2020_adj), color = "blue") +
-  theme_minimal()
+  theme_minimal() +
+  labs(
+    title = "Mean and Median income in the United States Between 1984 and 2019",
+    subtitle = "Using incomes adjusted to 2020 rates",
+    x = "Year",
+    y = "Income in USD (Adjusted for Inflation to 2020 Rates"
+  )
 ```
 
+```{r}
+full_ntl_data |> 
+  filter(year >= 1984) |> 
+  ggplot(aes(x = year)) +
+  geom_line(aes(y = mean_income), color = "red") +
+  geom_line(aes(y = median_income), color = "blue") +
+  theme_minimal() +
+  labs(
+    title = "Mean and Median income in the United States Between 1984 and 2019",
+    subtitle = "Using incomes adjusted to 2020 rates",
+    x = "Year",
+    y = "Income in USD (Adjusted for Inflation to 2020 Rates"
+  )
+```
+
+The two above graphs show that when accounting for inflation, Americans are earning less per year now than they did 30 years ago. 
 
 ### 2.3.3 House Elections
 
@@ -438,6 +470,7 @@ plot_usmap(data = map_data, values = "party_state_average", color = "black") +
 
 rm(map_data)
 ```
+We can see that, especially in the northern-midwest states, that the country has grown to be more republican in he last 30 years. However, in the last 10 years this has begun to shift again. During this whole time, it appears that New England has become more democrat.
 
 ### 2.3.4 Collective Bargaining and Wages
 
@@ -449,16 +482,19 @@ full_ntl_data |>
   geom_line(aes(y = nonunion_wage_2020_adj), color = "red") + 
   theme_minimal()
 ```
+From our income graphs, this graph is rather unintuitive, as we would expect adjusted wages to be decreasing in this time. There are a number of potential causes for this. First, Americans work less hours today than they did in 1980. Second, and more likely, is that the income variables we used includes those who are not working. As the U.S. experiences a graying of society, this could be driving down mean incomes.
+
 
 ```{r}
 full_ntl_data |> 
   filter(year >= 1984) |> 
   ggplot(aes(x = percent_collective_bargain)) +
-  geom_point(aes(y = wage), color = "blue") +
-  geom_point(aes(y = union_wage), color = "red") +
+  geom_point(aes(y = wage_2020_adj), color = "blue") +
+  geom_jitter(aes(y = union_wage_2020_adj), color = "red") +
   facet_wrap(~decade) 
 ```
 
+This graph is incredibly interesting. First, a quick view of this grpah shows the exact opposite of our hypothesis. Looking at each decade we can see collective bargaining rates decrease and wage increase. Then, in each decade that relationship continues. Still, we can see that in every decade, a collective bargaining agreement will lead to an increase in wages for a worker over a non-collective-bargaining-jobs. 
 
 ### 2.3.5 Collective Bargaining and House Elections
 
@@ -467,13 +503,35 @@ full_state_data |>
   filter(year >= 1984) |> 
   ggplot(aes(x = percent_collective_bargain, y = party_state_average)) +
   geom_point(color = "blue") +
-  geom_smooth(method = "lm") +
-  facet_wrap(~decade) 
+  geom_smooth(method = "lm", color = "red") +
+  facet_wrap(~decade) +
+  labs(
+    title = "Percent collective Bargaining vs Proportion of House Delegation that is Democratic",
+    x = "Percent of workers covered by Collective Bargaining",
+    y = "Proportion of House Delegation that is Democration"
+  )
 ```
 
-### 2.3.6 Wages and House elections 
+This graph demonstrates how political collective bargaining has become over the last 40 years. In the 1980s, there was almost no relationship between collective bargaining agreements and party affiliation. However, by 2020, there is now a significant bias 
+
+```{r}
+full_state_data |> 
+  filter(year <2020 & year >= 1984) |> 
+  filter(year %% 4==0) |>
+  ggplot(aes(x = percent_collective_bargain, y = party_state_average)) +
+  geom_jitter(aes(color = regions), alpha = 0.5, width = 0.1, height = 0.1) +
+  geom_smooth(method = "lm", color = "black") +
+  facet_wrap(~decade) +
+  labs(
+    title = "Percent collective Bargaining vs Proportion of House Delegation that is Democratic",
+    x = "Percent of workers covered by Collective Bargaining",
+    y = "Proportion of House Delegation that is Democration"
+  )
+```
 
 
 ## Modeling
+
+
 
 ## Conclusion
