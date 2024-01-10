@@ -1,0 +1,35 @@
+---
+title: "WIDS 2024 Final Presentation"
+author: "Michael Taffe, Melanie Klein, Ramiro Arevalo"
+format: 
+  revealjs:
+    theme: simple
+editor: visual
+---
+
+## Project Abstract
+
+
+
+## About the Data
+
+* **Union data**
+  * Gathered from Tidy Tuesday, although the original 
+* **House election data**
+  *
+* **Wage**
+  *
+
+## EDA
+
+When you click the **Render** button a presentation will be generated that includes both content and the output of embedded code. You can embed code like this:
+
+```{r}
+1 + 1
+```
+
+## Models
+
+## Conclusion
+
+## Where we would take our project in the future
