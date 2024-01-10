@@ -5,47 +5,39 @@ format: html
 editor: visual
 ---
 
-# useful git commands
+# 1. Comparing interactions between collective bargaining rates, wages, and House of Representative elections
 
-**This command will update all the branches on your computer** git remote update origin --prune
+** Insert abstract of project, where we got our data, what our data looks like, and other information here
 
-showing off branch
-
-test
-
-### Loading Packages
+# 2. Data Analysis 
+## 2.1 Getting Set Up
 
 ```{r}
-library(tidyverse)
-library(usmap)
+suppressPackageStartupMessages(library(tidyverse))
+library(usmap) # Used for map plots
 ```
 
-### Gathering Data
-
 ```{r}
-# Union Data
+# Union Data: obtained from Tidy Tuesday
 union_wages <- read_rds("../Data/union_wages.rds")
 union_states <- read_rds("../Data/union_states.rds")
 
-
-# Election Data
+# Election Data: Obtained from Tidy Tuesday
 house <- read_rds("../Data/house.rds")
 
-# Wage Data
+# Wage Data: Obtained from Tidy Tuesday
 income_distribution <- read_rds("../Data/income_distribution.rds")
 
-# Minimum Wage Data
-minimum_wage <- read_csv("../Data/minimum_wage_data.csv")
+# Minimum Wage Data: Obtained from U.S. Department of Labor
+minimum_wage <- read_csv("../Data/minimum_wage_data.csv",show_col_types = FALSE)
 ```
 
-### Cleaning Data
+## 2.2 Basic Data Cleaning
+### 2.2.1 Examining data shape
 
-#### Examining data shape
-
-First, lets get an idea of what our data looks like.
+Before we do anything to our data, we will examine our data to ensure everything loaded in correctly 
 
 ```{r}
-# look at columns
 head(union_wages)
 head(union_states)
 head(house)
@@ -78,7 +70,7 @@ summary(house)
 
 in the house data set, we can see a significant amount of NA values in the runoff column
 
-#### Cleaning data script
+### 2.2.2 Cleaning data script
 
 From a quick look at the shapes and distribution of the tables, the house table will be modified.
 
@@ -131,7 +123,9 @@ income_distribution <- income_distribution |>
   select(year:income_mean) |> 
   distinct(year, race, income_median, income_mean, .keep_all = TRUE) |> # only include one line per year. needed bc of multiple sectors that are not being used in data analysis
   rename(median_income = income_median,
-         mean_income = income_mean) # renaming columns
+         mean_income = income_mean) |> # renaming columns
+  filter(race == "All Races") |> 
+  select(-race)
 ```
 
 ```{r}
@@ -173,11 +167,11 @@ range(income_distribution$year) # ntl
 range(minimum_wage$year) # state
 ```
 
-### Combining dataframes
+### 2.2.3 Merging dataframes
 
 The states data set has five entries for each year for each of the five `sectors`. For this project we will use the `total` sector. A decades column will also be added.
 
-#### State Dataframes
+#### 2.2.3.1 State Dataframes
 
 ```{r}
 full_state_data <- union_states |> 
@@ -216,12 +210,11 @@ range(full_state_data$year)
 ```
 
 ```{r}
+head(full_state_data)
 summary(full_state_data)
 ```
 
-#### National Dataframes
-
-##### Creating Adjusted Wages Columns
+#### 2.2.3.2 National Dataframes
 
 ```{r}
 state_to_ntl_adjusted <- full_state_data |>
@@ -248,29 +241,39 @@ full_ntl_data <- income_distribution |>
          mean_median_income_difference_2020_adj = mean_median_income_difference * prop_2020_adj,
          wage_2020_adj = wage * prop_2020_adj,
          union_wage_2020_adj = union_wage * prop_2020_adj,
-         nonunion_wage_2020_adj = nonunion_wage * prop_2020_adj)
+         nonunion_wage_2020_adj = nonunion_wage * prop_2020_adj) |> 
+  select(-prop_2020_adj)
+```
+
+```{r}
+ntl_column_list <- c("year", "decade", "mean_income",
+                     "mean_income_2020_adj", "median_income",
+                     "median_income_2020_adj", "mean_median_income_difference",
+                     "mean_median_income_difference_2020_adj", "wage",
+                     "wage_2020_adj", "union_wage", "union_wage_2020_adj",
+                     "nonunion_wage", "nonunion_wage_2020_adj",
+                     "wage_percent_difference", 
+                     "wage_percent_difference_adjusted",
+                     "employment_count", "union_employment_count", 
+                     "collective_bargain_employment_count", "union_type")
+full_ntl_data <- full_ntl_data[, ntl_column_list] # reorder columns
+```
+
+```{r}
+rm(house, income_distribution, minimum_wage, state_to_ntl_adjusted,
+   state_to_ntl_employment, union_states, union_wages, state_column_list,
+   ntl_column_list)
 ```
 
 ```{r}
 range(full_ntl_data$year)
 ```
 
-### EDA
-
-```{r}
-summary(full_ntl_data)
-summary(full_state_data)
-```
+## 2.3 EDA
 
 #### Graphing Full State Data
 
 ##### Party by state and year
-
-```{r}
-library(gganimate)
-library(gifski)
-library(transformr)
-```
 
 
 
