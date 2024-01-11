@@ -336,26 +336,114 @@ Michael Taffe, Melanie Klein, Ramiro Arevalo
 </div>
 
 </section>
-<section id="quarto" class="slide level2">
-<h2>Quarto</h2>
-<p>Quarto enables you to weave together content and executable code into a finished presentation. To learn more about Quarto presentations see <a href="https://quarto.org/docs/presentations/" class="uri">https://quarto.org/docs/presentations/</a>.</p>
+<section id="project-abstract" class="slide level2">
+<h2>Project Abstract</h2>
 </section>
-<section id="bullets" class="slide level2">
-<h2>Bullets</h2>
-<p>When you click the <strong>Render</strong> button a document will be generated that includes:</p>
+<section id="about-the-data" class="slide level2 smaller">
+<h2>About the Data</h2>
 <ul>
-<li>Content authored with markdown</li>
-<li>Output from executable code</li>
+<li><strong>Union data</strong>
+<ul>
+<li>Gathered from Tidy Tuesday, although the original data comes from the Union Membership and Coverage Database at Georgia state university</li>
+<li>For our project, the relevant tables include one that details union membership counts by state by year and another that tracks union and non union wages by year.</li>
+</ul></li>
+<li><strong>House election data</strong>
+<ul>
+<li>Also gathered from Tidy Tuesday’s repository, this data originally came from the MIT Election Data and Science Lab</li>
+<li>The variables we selected from the data set were year, state, district, and election winner</li>
+</ul></li>
+<li><strong>Wage</strong>
+<ul>
+<li>Our wage data was obtained through the U.S. Department of Labor and Tidy Tuesday (originally from U.S. census data)</li>
+<li>This data tracked the mean and median income nationally in the United States</li>
+<li>Another table tracked minimum wage at the state level</li>
+</ul></li>
 </ul>
 </section>
-<section id="code" class="slide level2">
-<h2>Code</h2>
-<p>When you click the <strong>Render</strong> button a presentation will be generated that includes both content and the output of embedded code. You can embed code like this:</p>
-<div class="cell">
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] 2</code></pre>
+<section id="data-manipulation-pt.-1" class="slide level2">
+<h2>Data manipulation pt.&nbsp;1</h2>
+<ul>
+<li>All of our data had undergone basic cleaning before we downloaded it so all of the columns were correctly formatted and there was almost 0 NA values</li>
+<li>each data set was pared down so that only the variables relevant to our project was completed.</li>
+<li>for our house election data, the table was manipulated so that only rows of candidates who won their election remained.
+<ul>
+<li>other minor changes included renaming variables and recoding a few outlier observations in the <code>party</code> variable</li>
+</ul></li>
+<li>For the union data, we filtered the datasets down to not include union sectors (ex. construction-unions) and added columns to adjust for inflation</li>
+<li>For our wage data, we filtered out race, as this was outside of the scope of our study.</li>
+</ul>
+</section>
+<section id="data-manipulation-pt.-2" class="slide level2">
+<h2>Data Manipulation pt.&nbsp;2</h2>
+<ul>
+<li>Our last data manipulation was combining all of our tables into two data sets: one that stores data at a national level, and another that stores data at a state level.</li>
+<li>some of the variables were only provided at the state level so they were summarized and added to the national data set.</li>
+</ul>
+</section>
+<section id="eda-pt.-1-overview" class="slide level2">
+<h2>EDA pt.&nbsp;1: Overview</h2>
+<ul>
+<li>EDA was split into five sections: wage data, union data, house data, wage data’s associations with union data, and union data’s association with house data. We did not have the relevent wage data to compare wages and house elections</li>
+</ul>
+</section>
+<section id="eda-pt.-2-wage-data" class="slide level2">
+<h2>EDA pt.&nbsp;2: Wage Data</h2>
+<div class="columns">
+<div class="column" style="width:60%;">
+<p>column 1</p>
+</div><div class="column" style="width:40%;">
+<p>column 2</p>
 </div>
 </div>
+</section>
+<section id="eda-pt.-3-union-data" class="slide level2">
+<h2>EDA pt.&nbsp;3: Union Data</h2>
+<div class="columns">
+<div class="column" style="width:60%;">
+<p>column 1</p>
+</div><div class="column" style="width:40%;">
+<p>column 2</p>
+</div>
+</div>
+</section>
+<section id="eda-pt.-4-house-data" class="slide level2">
+<h2>EDA pt.&nbsp;4: House Data</h2>
+<div class="columns">
+<div class="column" style="width:60%;">
+<p>column 1</p>
+</div><div class="column" style="width:40%;">
+<p>column 2</p>
+</div>
+</div>
+</section>
+<section id="eda-pt.-5-wage-datas-interactions-with-union-data" class="slide level2">
+<h2>EDA pt.&nbsp;5: Wage Data’s Interactions With Union Data</h2>
+<div class="columns">
+<div class="column" style="width:60%;">
+<p>column 1</p>
+</div><div class="column" style="width:40%;">
+<p>column 2</p>
+</div>
+</div>
+</section>
+<section id="eda-pt.-6-house-election-datas-interactions-with-union-data" class="slide level2">
+<h2>EDA pt.&nbsp;6: House Election Data’s Interactions With Union Data</h2>
+<div class="columns">
+<div class="column" style="width:60%;">
+<p>column 1</p>
+</div><div class="column" style="width:40%;">
+<p>column 2</p>
+</div>
+</div>
+</section>
+<section id="models" class="slide level2">
+<h2>Models</h2>
+</section>
+<section id="conclusion" class="slide level2">
+<h2>Conclusion</h2>
+</section>
+<section id="where-we-would-take-our-project-in-the-future" class="slide level2">
+<h2>Where we would take our project in the future</h2>
 <div class="footer footer-default">
 
 </div>
@@ -571,44 +659,6 @@ Michael Taffe, Melanie Klein, Ramiro Arevalo
         ]
       });
     </script>
-    
-    <script>
-      // htmlwidgets need to know to resize themselves when slides are shown/hidden.
-      // Fire the "slideenter" event (handled by htmlwidgets.js) when the current
-      // slide changes (different for each slide format).
-      (function () {
-        // dispatch for htmlwidgets
-        function fireSlideEnter() {
-          const event = window.document.createEvent("Event");
-          event.initEvent("slideenter", true, true);
-          window.document.dispatchEvent(event);
-        }
-
-        function fireSlideChanged(previousSlide, currentSlide) {
-          fireSlideEnter();
-
-          // dispatch for shiny
-          if (window.jQuery) {
-            if (previousSlide) {
-              window.jQuery(previousSlide).trigger("hidden");
-            }
-            if (currentSlide) {
-              window.jQuery(currentSlide).trigger("shown");
-            }
-          }
-        }
-
-        // hookup for slidy
-        if (window.w3c_slidy) {
-          window.w3c_slidy.add_observer(function (slide_num) {
-            // slide_num starts at position 1
-            fireSlideChanged(null, w3c_slidy.slides[slide_num - 1]);
-          });
-        }
-
-      })();
-    </script>
-
     <script id="quarto-html-after-body" type="application/javascript">
     window.document.addEventListener("DOMContentLoaded", function (event) {
       const toggleBodyColorMode = (bsSheetEl) => {
