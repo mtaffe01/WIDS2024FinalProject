@@ -449,9 +449,9 @@ full_ntl_data |>
   theme_minimal() +
   labs(
     title = "Mean and Median Income in the United States Between 1984 and 2019",
-    subtitle = "Using mean (red) and median (blue) incomes adjusted to 2020 rates",
+    subtitle = "Using mean (red) and median (blue) incomes",
     x = "Year",
-    y = "Income in USD (Adjusted for Inflation to 2020 Rates)"
+    y = "Income in USD"
   )
 ```
 
