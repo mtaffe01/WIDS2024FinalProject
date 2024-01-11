@@ -1,8 +1,10 @@
 ---
 title: "Your Substantive Title Here"
 author: 
-  - Your Name1^[American University]
-  - Your Name2^[American University]
+  - Melanie Klein^[American University]
+  - Michael Taffe^[American University]
+  - Ramiro Arevalo^[American University]
+
 format: 
   pdf:
     number-sections: true
