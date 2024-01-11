@@ -571,6 +571,7 @@ full_state_data |>
   geom_jitter(aes(color = regions), alpha = 0.15, width = 0.1, height = 0.1) +
   geom_smooth(method = "lm", aes(group = regions, color = regions), se = FALSE) +
   facet_wrap(~decade) +
+  theme_light() +
   labs(
     title = "Percent Collective Bargaining vs Proportion of House Delegation That is Democratic",
     subtitle = "Regressed by Region",
