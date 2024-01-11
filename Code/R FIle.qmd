@@ -70,7 +70,7 @@ Again, there are no NA values in the States data set, although we do see some si
 summary(house)
 ```
 
-in the house data set, we can see a significant amount of NA values in the runoff column
+In the house data set, we can see a significant amount of NA values in the runoff column
 
 ### 2.2.2 Cleaning data script
 
@@ -346,7 +346,8 @@ per_collective_wage_data |> # use created table here
   scale_x_continuous(breaks = seq(min(per_collective_wage_data$year), max(per_collective_wage_data$year), by = 4)) + 
   labs(title = "States by % of Labor Market Covered By a Collective Bargaining Agreement",
        x = "Year",
-       y = "% of Labor Market in a Collective Bargaining Agreement")
+       y = "% of Labor Market in a Collective Bargaining Agreement",
+       color = "Selected States")
 
 rm(per_collective_wage_data)
 ```
@@ -382,7 +383,8 @@ state_minimum_wage_data |> # use created table here
   labs(title = "State Minimum Wage by Year (Adjusted for 2020 $)",
        subtitle = "For states with an adjusted effective minimum wage above the federal level",
        x = "Year",
-       y = "Minimum Wage (2020 USD)")
+       y = "Minimum Wage (2020 USD)",
+       color = "Selected States")
 
 rm(state_minimum_wage_data) # remove object to make graph
 ```
@@ -415,7 +417,8 @@ effective_minimum_wage_data |>
   labs(title = "State Effective Minimum Wage by Year (Adjusted for 2020 $)",
        subtitle = "For states with an adjusted effective minimum wage above the federal level",
        x = "Year",
-       y = "Effective minimum wage (2020 USD)")
+       y = "Effective minimum wage (2020 USD)",
+       color = "Selected States")
 
 rm(effective_minimum_wage_data)
 ```
@@ -430,8 +433,8 @@ full_ntl_data |>
   geom_line(aes(y = median_income_2020_adj), color = "blue") +
   theme_minimal() +
   labs(
-    title = "Mean and Median income in the United States Between 1984 and 2019",
-    subtitle = "Using incomes adjusted to 2020 rates",
+    title = "Mean and Median Income in the United States Between 1984 and 2019",
+    subtitle = "Using mean (red) and median (blue) incomes adjusted to 2020 rates",
     x = "Year",
     y = "Income in USD (Adjusted for Inflation to 2020 Rates"
   )
@@ -445,10 +448,10 @@ full_ntl_data |>
   geom_line(aes(y = median_income), color = "blue") +
   theme_minimal() +
   labs(
-    title = "Mean and Median income in the United States Between 1984 and 2019",
-    subtitle = "Using incomes adjusted to 2020 rates",
+    title = "Mean and Median Income in the United States Between 1984 and 2019",
+    subtitle = "Using mean (red) and median (blue) incomes adjusted to 2020 rates",
     x = "Year",
-    y = "Income in USD (Adjusted for Inflation to 2020 Rates"
+    y = "Income in USD (Adjusted for Inflation to 2020 Rates)"
   )
 ```
 
@@ -470,7 +473,7 @@ plot_usmap(data = map_data, values = "party_state_average", color = "black") +
 
 rm(map_data)
 ```
-We can see that, especially in the northern-midwest states, that the country has grown to be more republican in he last 30 years. However, in the last 10 years this has begun to shift again. During this whole time, it appears that New England has become more democrat.
+We can see that, especially in the northern-midwest states, that the country has grown to be more republican in the last 30 years. However, in the last 10 years this has begun to shift again. During this whole time, it appears that New England has become more democrat.
 
 ### 2.3.4 Collective Bargaining and Wages
 
@@ -494,7 +497,7 @@ full_ntl_data |>
   facet_wrap(~decade) 
 ```
 
-This graph is incredibly interesting. First, a quick view of this grpah shows the exact opposite of our hypothesis. Looking at each decade we can see collective bargaining rates decrease and wage increase. Then, in each decade that relationship continues. Still, we can see that in every decade, a collective bargaining agreement will lead to an increase in wages for a worker over a non-collective-bargaining-jobs. 
+This graph is incredibly interesting. First, a quick view of this graph shows the exact opposite of our hypothesis. Looking at each decade we can see collective bargaining rates decrease and wage increase. Then, in each decade that relationship continues. Still, we can see that in every decade, a collective bargaining agreement will lead to an increase in wages for a worker over a non-collective-bargaining-jobs. 
 
 ### 2.3.5 Collective Bargaining and House Elections
 
@@ -506,13 +509,13 @@ full_state_data |>
   geom_smooth(method = "lm", color = "red") +
   facet_wrap(~decade) +
   labs(
-    title = "Percent collective Bargaining vs Proportion of House Delegation that is Democratic",
-    x = "Percent of workers covered by Collective Bargaining",
-    y = "Proportion of House Delegation that is Democration"
+    title = "Percent Collective Bargaining vs Proportion of House Delegation that is Democratic",
+    x = "Percent of Workers Covered by Collective Bargaining",
+    y = "Proportion of House Delegation that is Democratic"
   )
 ```
 
-This graph demonstrates how political collective bargaining has become over the last 40 years. In the 1980s, there was almost no relationship between collective bargaining agreements and party affiliation. However, by 2020, there is now a significant bias 
+This graph demonstrates how political collective bargaining has become over the last 40 years. In the 1980s, there was almost no relationship between collective bargaining agreements and party affiliation. However, by 2020, there is now a significant bias. 
 
 ```{r}
 full_state_data |> 
@@ -523,15 +526,110 @@ full_state_data |>
   geom_smooth(method = "lm", color = "black") +
   facet_wrap(~decade) +
   labs(
-    title = "Percent collective Bargaining vs Proportion of House Delegation that is Democratic",
-    x = "Percent of workers covered by Collective Bargaining",
-    y = "Proportion of House Delegation that is Democration"
+    title = "Percent Collective Bargaining vs Proportion of House Delegation that is Democratic",
+    x = "Percent of Workers Covered by Collective Bargaining",
+    y = "Proportion of House Delegation that is Democratic",
+    color = "Region"
   )
 ```
 
+This graph demonstrates the same as the previous graph, but with a linear regression line for each region.
+
+```{r}
+full_state_data |> 
+  filter(year <2020 & year >= 1984) |> 
+  filter(year %% 4==0) |>
+  ggplot(aes(x = percent_collective_bargain, y = party_state_average)) +
+  geom_jitter(aes(color = regions), alpha = 0.1, width = 0.1, height = 0.1) +
+  geom_smooth(method = "lm", aes(group = regions, color = regions), se = FALSE) +
+  facet_wrap(~decade) +
+  labs(
+    title = "Percent Collective Bargaining vs Proportion of House Delegation that is Democratic",
+    x = "Percent of Workers Covered by Collective Bargaining",
+    y = "Proportion of House Delegation that is Democratic",
+    color = "Region"
+  )
+```
 
 ## Modeling
 
+T-test between union and non-union wages
+```{r}
+# 1984 to 2019
+t.test(full_ntl_data$union_wage_2020_adj, full_ntl_data$nonunion_wage_2020_adj)
+
+# 1980s
+full_ntl_data_1980s <- full_ntl_data |>
+  filter(year >= 1984 & year < 1990)
+t.test(full_ntl_data_1980s$union_wage_2020_adj, full_ntl_data_1980s$nonunion_wage_2020_adj)
+
+# 1990s
+full_ntl_data_1990s <- full_ntl_data |>
+  filter(year >= 1990 & year < 2000)
+t.test(full_ntl_data_1990s$union_wage_2020_adj, full_ntl_data_1990s$nonunion_wage_2020_adj)
+
+# 2000s
+full_ntl_data_2000s <- full_ntl_data |>
+  filter(year >= 2000 & year < 2010)
+t.test(full_ntl_data_2000s$union_wage_2020_adj, full_ntl_data_2000s$nonunion_wage_2020_adj)
+
+# 2010s
+full_ntl_data_2010s <- full_ntl_data |>
+  filter(year >= 2010 & year < 2020)
+t.test(full_ntl_data_2010s$union_wage_2020_adj, full_ntl_data_2010s$nonunion_wage_2020_adj)
+```
+
+T test between median and mean incomes
+```{r}
+# 1984 to 2019
+t.test(full_ntl_data$median_income_2020_adj, full_ntl_data$mean_income_2020_adj)
+
+# 1980s
+full_ntl_data_1980s <- full_ntl_data |>
+  filter(year >= 1984 & year < 1990)
+t.test(full_ntl_data_1980s$median_income_2020_adj, full_ntl_data_1980s$mean_income_2020_adj)
+
+# 1990s
+full_ntl_data_1990s <- full_ntl_data |>
+  filter(year >= 1990 & year < 2000)
+t.test(full_ntl_data_1990s$median_income_2020_adj, full_ntl_data_1990s$mean_income_2020_adj)
+
+# 2000s
+full_ntl_data_2000s <- full_ntl_data |>
+  filter(year >= 2000 & year < 2010)
+t.test(full_ntl_data_2000s$median_income_2020_adj, full_ntl_data_2000s$mean_income_2020_adj)
+
+# 2010s
+full_ntl_data_2010s <- full_ntl_data |>
+  filter(year >= 2010 & year < 2020)
+t.test(full_ntl_data_2010s$median_income_2020_adj, full_ntl_data_2010s$mean_income_2020_adj)
+```
+
+Regression between percent union and party state average
+```{r}
+# 1984 to 2019
+summary(lm(full_state_data$party_state_average~full_state_data$percent_union))
+
+# 1980s
+full_state_data_1980s <- full_state_data |>
+  filter(year >= 1984 & year < 1990)
+summary(lm(full_state_data_1980s$party_state_average~full_state_data_1980s$percent_union))
+
+# 1990s
+full_state_data_1990s <- full_state_data |>
+  filter(year >= 1990 & year < 2000)
+summary(lm(full_state_data_1990s$party_state_average~full_state_data_1990s$percent_union))
+
+# 20000s
+full_state_data_2000s <- full_state_data |>
+  filter(year >= 2000 & year < 2010)
+summary(lm(full_state_data_2000s$party_state_average~full_state_data_2000s$percent_union))
+
+# 2010s
+full_state_data_2010s <- full_state_data |>
+  filter(year >= 2010 & year < 2020)
+summary(lm(full_state_data_2010s$party_state_average~full_state_data_2010s$percent_union))
+```
 
 
 ## Conclusion
