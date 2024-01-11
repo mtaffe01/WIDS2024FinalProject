@@ -24,9 +24,8 @@ bibliography: main.bib
 # This chunk loads any packages we need.
 # Because "message: false", any R messages from this chunk do not appear in our paper.
 
-library(kableExtra)
-library(parameters)
 library(tidyverse)
+library(usmap)
 ```
 
 ```{r}
@@ -39,7 +38,93 @@ library(tidyverse)
 
 # Because echo: false, this chunk itself is not shown.
 
-data("cars")
+# Union Data: obtained from Tidy Tuesday
+union_wages <- read_rds("../Data/union_wages.rds")
+union_states <- read_rds("../Data/union_states.rds")
+
+# Election Data: Obtained from Tidy Tuesday
+house <- read_rds("../Data/house.rds")
+
+# Wage Data: Obtained from Tidy Tuesday
+income_distribution <- read_rds("../Data/income_distribution.rds")
+
+# Minimum Wage Data: Obtained from U.S. Department of Labor
+minimum_wage <- read_csv("../Data/minimum_wage_data.csv",show_col_types = FALSE)
+
+
+# Clean house election data
+house <- house |>
+  group_by(year, state, district) |> # group for next line
+  filter(candidatevotes == max(candidatevotes)) |> #only include candidates that won
+  ungroup() |> 
+  mutate(state = str_to_sentence(state)) |> # change from all caps to sentence case) 
+  select(!(state_fips:office)) |> #Remove unwanted columns
+  select(!(stage:candidate)) |> 
+  select(!(writein:fusion_ticket)) |> 
+  rename(state_abbreviation = state_po) |>  # rename state abbreviation column
+  mutate(party = case_when(
+    str_detect(party, "DEMOCRAT") ~ "DEMOCRAT",
+    str_detect(party, "REPUBLICAN") ~ "REUBLICAN",
+    str_detect(party, "INDEPENDENT") ~ "INDEPENDENT"
+  )) # Recode of party variable
+
+
+# Clean union wages data
+union_wages <- union_wages |> 
+  filter(facet == "all wage and salary workers") |> 
+  distinct(year, .keep_all = TRUE) |> 
+  select(-sample_size,
+         -at_cap) |> 
+  mutate(wage_percent_difference = union_wage_premium_raw, .keep = "unused") |> 
+  mutate(wage_percent_difference_adjusted = union_wage_premium_adjusted, .keep = "unused") |> 
+  mutate(union_type = facet, .keep = "unused")
+
+
+# Clean union states data
+union_states <- union_states |> 
+  select(-state_census_code,
+         -observations) |> # remove unwanted columns
+  mutate(employment_count = employment * 1000, .keep = "unused") |> # column measured in 1000s, this fixes it
+  mutate(union_employment_count = members * 1000, .keep = "unused") |> 
+  mutate(collective_bargain_employment_count = covered * 1000,
+         .keep = "unused") |> 
+  rename(
+    percent_union = p_members,
+    percent_collective_bargain = p_covered
+  ) #renamed columns
+
+
+# Clean income distribution data
+income_distribution <- income_distribution |> 
+  select(-number) |> # removing unwanted columns
+  select(!ends_with("moe")) |> 
+  select(year:income_mean) |> 
+  distinct(year, race, income_median, income_mean, .keep_all = TRUE) |> # only include one line per year. needed bc of multiple sectors that are not being used in data analysis
+  rename(median_income = income_median,
+         mean_income = income_mean) |> # renaming columns
+  filter(race == "All Races") |> 
+  select(-race)
+
+
+# Clean minimum wage data
+minimum_wage <- minimum_wage |> 
+  select(Year:CPI.Average) |> # selecting relevant columns
+  rename(year = Year,
+         state = State,
+         state_min_wage = State.Minimum.Wage,
+         state_min_wage_2020_adj = State.Minimum.Wage.2020.Dollars,
+         fed_min_wage = Federal.Minimum.Wage,
+         fed_min_wage_2020_adj = Federal.Minimum.Wage.2020.Dollars,
+         effective_min_wage = Effective.Minimum.Wage,
+         effective_min_wage_2020_adj = Effective.Minimum.Wage.2020.Dollars,
+         CPI_avg = CPI.Average
+  ) |> # renaming variables
+  filter(!state %in% c("U.S. Virgin Islands", "Puerto Rico", "Guam")) |>  # remove territory
+  mutate(state_abbreviation = 
+           ifelse(is.na(state.abb[match(state, state.name)]),
+                  "DC",
+                  state.abb[match(state, state.name)]),
+         .keep = "unused", .after = year) # replaces state with state abbreviation, NA values coded as DC as DC is the only NA value 
 ```
 
 ```{r readdata}
@@ -48,7 +133,79 @@ data("cars")
  
 # Because eval: false, this chunk is not run.
 
-df <- read.csv()
+# Joining data sets to create full state data
+full_state_data <- union_states |> 
+  filter(sector == "Total") |> 
+  select(-sector,
+         -state) |> 
+  left_join(house, by = c("year", "state_abbreviation")) |> 
+  mutate(decade = paste0((year - year %% 10), "s"),
+         party_binary = ifelse(party == "DEMOCRAT", 1, 0)) |> 
+  left_join(minimum_wage, by = c("year", "state_abbreviation")) |> 
+  group_by(year, state) |> 
+  mutate(party_state_average = mean(party_binary)) |>
+  ungroup() |> 
+  mutate(state = state.name[match(state_abbreviation, state.abb)], # fix state encoding
+         regions = state.region[match(state_abbreviation, state.abb)]) # fix region encoding
+
+state_column_list = c("year", "decade", "state", "state_abbreviation",
+                      "regions", "district", "party", "party_binary",
+                      "party_state_average",
+                      "employment_count", "union_employment_count",
+                      "collective_bargain_employment_count", "percent_union",
+                      "percent_collective_bargain", "state_min_wage",
+                      "state_min_wage_2020_adj", "fed_min_wage",
+                      "fed_min_wage_2020_adj", "effective_min_wage",
+                      "effective_min_wage_2020_adj", "CPI_avg")
+full_state_data <- full_state_data[, state_column_list] # reorder columns
+full_state_data$party[is.na(full_state_data$party)] <- "No election" # replace party NAs
+full_state_data$district[is.na(full_state_data$district)] <- "No election" # replace district NAs
+full_state_data$party_binary[is.na(full_state_data$party_binary)] <- "No election" # replace district NAs
+
+
+# Joining data sets to create full national data
+state_to_ntl_adjusted <- full_state_data |>
+  mutate(prop_2020_adj = fed_min_wage_2020_adj / fed_min_wage, .after = year) |>
+  distinct(year, .keep_all = TRUE) |>
+  select(year, prop_2020_adj)
+
+state_to_ntl_employment <- full_state_data |>
+  group_by(year) |>
+  summarise_at(vars(employment_count:collective_bargain_employment_count), sum)
+
+full_ntl_data <- income_distribution |> 
+  left_join(union_wages, by = "year") |>
+  left_join(state_to_ntl_adjusted, by = "year") |>
+  left_join(state_to_ntl_employment, by = "year") |>
+  mutate(decade = paste0((year - year %% 10), "s"), .after = year) |>
+  mutate(mean_median_income_difference = mean_income - median_income, .after = mean_income) |>
+   mutate(median_income_2020_adj = median_income * prop_2020_adj,
+         mean_income_2020_adj = mean_income * prop_2020_adj,
+         mean_median_income_difference_2020_adj = mean_median_income_difference * prop_2020_adj,
+         wage_2020_adj = wage * prop_2020_adj,
+         union_wage_2020_adj = union_wage * prop_2020_adj,
+         nonunion_wage_2020_adj = nonunion_wage * prop_2020_adj,
+         percent_union = union_employment_count / employment_count,
+         percent_collective_bargain = collective_bargain_employment_count / employment_count) |> 
+  select(-prop_2020_adj)
+
+ntl_column_list <- c("year", "decade", "mean_income",
+                     "mean_income_2020_adj", "median_income",
+                     "median_income_2020_adj", "mean_median_income_difference",
+                     "mean_median_income_difference_2020_adj", "wage",
+                     "wage_2020_adj", "union_wage", "union_wage_2020_adj",
+                     "nonunion_wage", "nonunion_wage_2020_adj",
+                     "wage_percent_difference", 
+                     "wage_percent_difference_adjusted",
+                     "employment_count", "union_employment_count", 
+                     "collective_bargain_employment_count",
+                     "percent_union", "percent_collective_bargain",
+                     "union_type")
+full_ntl_data <- full_ntl_data[, ntl_column_list] # reorder columns
+
+rm(house, income_distribution, minimum_wage, state_to_ntl_adjusted,
+   state_to_ntl_employment, union_states, union_wages, state_column_list,
+   ntl_column_list)
 ```
 
 # Introduction
