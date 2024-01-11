@@ -584,84 +584,63 @@ These two graphs show very interesting results. First, we can see how unions hav
 
 ## Modeling
 
-T-test between union and non-union wages
-
+Regression between percent collective bargaining and party state average
 ```{r}
-# 1984 to 2019
-t.test(full_ntl_data$union_wage_2020_adj, full_ntl_data$nonunion_wage_2020_adj)
-
-# 1980s
-full_ntl_data_1980s <- full_ntl_data |>
-  filter(year >= 1984 & year < 1990)
-t.test(full_ntl_data_1980s$union_wage_2020_adj, full_ntl_data_1980s$nonunion_wage_2020_adj)
-
-# 1990s
-full_ntl_data_1990s <- full_ntl_data |>
-  filter(year >= 1990 & year < 2000)
-t.test(full_ntl_data_1990s$union_wage_2020_adj, full_ntl_data_1990s$nonunion_wage_2020_adj)
-
-# 2000s
-full_ntl_data_2000s <- full_ntl_data |>
-  filter(year >= 2000 & year < 2010)
-t.test(full_ntl_data_2000s$union_wage_2020_adj, full_ntl_data_2000s$nonunion_wage_2020_adj)
-
-# 2010s
-full_ntl_data_2010s <- full_ntl_data |>
-  filter(year >= 2010 & year < 2020)
-t.test(full_ntl_data_2010s$union_wage_2020_adj, full_ntl_data_2010s$nonunion_wage_2020_adj)
-```
-
-T test between median and mean incomes
-
-```{r}
-# 1984 to 2019
-t.test(full_ntl_data$median_income_2020_adj, full_ntl_data$mean_income_2020_adj)
-
-# 1980s
-full_ntl_data_1980s <- full_ntl_data |>
-  filter(year >= 1984 & year < 1990)
-t.test(full_ntl_data_1980s$median_income_2020_adj, full_ntl_data_1980s$mean_income_2020_adj)
-
-# 1990s
-full_ntl_data_1990s <- full_ntl_data |>
-  filter(year >= 1990 & year < 2000)
-t.test(full_ntl_data_1990s$median_income_2020_adj, full_ntl_data_1990s$mean_income_2020_adj)
-
-# 2000s
-full_ntl_data_2000s <- full_ntl_data |>
-  filter(year >= 2000 & year < 2010)
-t.test(full_ntl_data_2000s$median_income_2020_adj, full_ntl_data_2000s$mean_income_2020_adj)
-
-# 2010s
-full_ntl_data_2010s <- full_ntl_data |>
-  filter(year >= 2010 & year < 2020)
-t.test(full_ntl_data_2010s$median_income_2020_adj, full_ntl_data_2010s$mean_income_2020_adj)
-```
-
-Regression between percent union and party state average
-
-```{r}
-# 1980s
-full_state_data_1980s <- full_state_data |>
-  filter(year >= 1984 & year < 1990)
-CB_party_1980s_regression <- summary(lm(full_state_data_1980s$party_state_average~full_state_data_1980s$percent_collective_bargain))$coefficients
-
-
-
-
-# 2010s
-full_state_data_2010s <- full_state_data |>
-  filter(year >= 2010 & year < 2020)
-summary(lm(full_state_data_2010s$party_state_average~full_state_data_2010s$percent_union))
-```
-
-```{r}
-CB_party_1980s_regression <- CB_party_1980s_regression |> 
+decade_region <- list(
+  c("1980s", "Northeast"),
+  c("1980s", "West"),
+  c("1980s", "North Central"),
+  c("1980s", "South"),
+  c("2010s", "Northeast"),
+  c("2010s", "West"),
+  c("2010s", "North Central"),
+  c("2010s", "South")
+)
+                  
+regression_decade_region <- function(decade1, region1) {
+  full_state_data_filtered <- subset(full_state_data, regions == region1 & decade == decade1)
+  model <- lm(full_state_data_filtered$party_state_average~full_state_data_filtered$percent_collective_bargain) 
+  summary(model)$coefficients |> 
   as_tibble() |> 
-  mutate(Reggression_Run = c("Intercept", "percent_collective_bargain"))
+  mutate(Reggression_Run = c("Intercept", "percent_collective_bargain"),
+         Decade = c(decade1, decade1),
+         Region = c(region1, region1),
+         .before = Estimate)
+}  
 
-CB_party_1980s_regression
+full_state_data_temp <- full_state_data |>
+  filter(year >= 1984 & year < 1990)
+CB_party_regression <- summary(lm(full_state_data_temp$party_state_average~full_state_data_temp$percent_collective_bargain))$coefficients |> 
+  as_tibble() |> 
+  mutate(Reggression_Run = c("Intercept", "percent_collective_bargain"),
+         Decade = c("1980s", "1980s"),
+         Region = c("all", "all"),
+         .before = Estimate)
+
+for (x in decade_region) {
+  CB_party_regression <- full_join(CB_party_regression, regression_decade_region(x[1], x[2]),
+                                   by = join_by(Reggression_Run, Decade, Region, Estimate, `Std. Error`, `t value`, `Pr(>|t|)`))
+}
+
+full_state_data_temp <- full_state_data |>
+  filter(year >= 2010 & year < 2020)
+CB_party_temp <- summary(lm(full_state_data_temp$party_state_average~full_state_data_temp$percent_collective_bargain))$coefficients |> 
+  as_tibble() |> 
+  mutate(Reggression_Run = c("Intercept", "percent_collective_bargain"),
+         Decade = c("2010s", "2010s"),
+         Region = c("all", "all"),
+         .before = Estimate)
+
+CB_party_regression <- full_join(CB_party_regression, CB_party_temp,
+                                   by = join_by(Reggression_Run, Decade, Region, Estimate, `Std. Error`, `t value`, `Pr(>|t|)`))
+
+CB_party_regression |>
+  filter(Reggression_Run == "percent_collective_bargain")
 ```
+
+
+
+      
 
 
 ## Conclusion
