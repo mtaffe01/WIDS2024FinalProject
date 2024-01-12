@@ -50,7 +50,7 @@ From the head() function we can already see some tidying that needs to be done, 
 
 Next we will look at a quick summary of the data to find very obvious trends.
 
-From the summary, we can see the demographics has most of its variables skewed. This will be examined in closer detail in the exploratory data analysis. only two columns have NA values and each of those columns NA values represent less than 10% of the data. There is not an immediate cause to take action on these NA values, although they will be examined in greater detail in the EDA.
+From the summary, we can see the demographics has most of its variables skewed. This will be examined in closer detail in the exploratory data analysis. Only two columns have NA values and each of those columns NA values represent less than 10% of the data. There is not an immediate cause to take action on these NA values, although they will be examined in greater detail in the EDA.
 
 ```{r}
 # look for NAs and skews
@@ -695,7 +695,7 @@ CB_party_regression <- full_join(CB_party_regression, CB_party_temp,
 rm(CB_party_temp, x, regression_decade_region)
 ```
 
-#### 2.4.2.1 Graph of regression estimate by decade and year
+#### 2.4.2.1 Graph of regression estimate by decade and region
 
 ```{r}
 Regression_plot <- ggplot(CB_party_regression, aes(x = Decade, y = Estimate, fill = Region)) +
