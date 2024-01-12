@@ -262,6 +262,7 @@ We almost never refer to specific variable, object, function, or data frame name
 
 ```{r fig-uniondata}
 #| echo: false
+#| warning: FALSE
 #| fig-cap: Union Data
 
 per_collective_wage_data <- full_state_data |> # This object will be used to create the graph and also in the data subset
@@ -297,6 +298,7 @@ per_collective_wage_data |> # use created table here
 ## Income Data
 ```{r fig-incomedata}
 #| echo: false
+#| warning: FALSE
 #| fig-cap: Income Data
 
 full_ntl_data |> 
@@ -317,6 +319,7 @@ full_ntl_data |>
 
 ```{r fig-incomedataadj}
 #| echo: false
+#| warning: FALSE
 #| fig-cap: Income Data (adjusted)
 
 full_ntl_data |> 
@@ -337,6 +340,7 @@ full_ntl_data |>
 
 ```{r fig-wagedata}
 #| echo: false
+#| warning: FALSE
 #| fig-cap: Wage Data
 
 effective_minimum_wage_data <- full_state_data |> 
@@ -373,6 +377,7 @@ effective_minimum_wage_data |>
 
 ```{r fig-housedata}
 #| echo: false
+#| warning: FALSE
 #| fig-cap: House Data
 
 map_data <- full_state_data |> 
@@ -401,6 +406,7 @@ plot_usmap(data = map_data, values = "party_state_average", color = "black") +
 
 ```{r fig-unionwagedata}
 #| echo: false
+#| warning: FALSE
 #| fig-cap: Union Wage Data
 
 full_ntl_data |> 
@@ -420,6 +426,7 @@ full_ntl_data |>
 
 ```{r fig-collectivebargain}
 #| echo: false
+#| warning: FALSE
 #| fig-cap: Collective Bargain Data
 
 full_ntl_data |> 
@@ -440,6 +447,7 @@ full_ntl_data |>
 
 ```{r fig-collectivebargaindecade}
 #| echo: false
+#| warning: FALSE
 #| fig-cap: Collective Bargain Data by Decade
 
 full_state_data |> 
@@ -459,6 +467,7 @@ full_state_data |>
 
 ```{r fig-collectivebargainregion}
 #| echo: false
+#| warning: FALSE
 #| fig-cap: Collective Bargain Region by Decade and Region
 
 full_state_data |> 
@@ -578,7 +587,7 @@ The regression analysis shows that the south and north central regions in the Un
 
 ## Comparing Wages between Union and Non Union Workers
 
-Our results for these t-tests determine if there is a statistically significant difference between union wages and non union wages in the 1980s and the 2010s.
+Our results seen in @tbl-ttest for these t-tests determine if there is a statistically significant difference between union wages and non union wages in the 1980s and the 2010s.
 
 ```{r ttest}
 #| echo: FALSE
@@ -603,7 +612,7 @@ t_upper_ci_2010s <- t_out_2010s$conf.int[2] |> round(2)
 The difference between union wages and non union wages means in the 1980s is `r t_out_1980s$estimate[2] - t_out_1980s$estimate[1]`, with a 95% confidence interval that covers $(`r -t_upper_ci_1980s`, `r -t_lower_ci_1980s`)$. The difference between union wages and non union wages means in the 2010s is `r t_out_2010s$estimate[2] - t_out_2010s$estimate[1]`, with a 95% confidence interval that covers $(`r -t_upper_ci_2010s`, `r -t_lower_ci_2010s`)$. The 95% confidence interval for the 1980s has a smaller range than the 95% confidence interval for the 2010s.
 
 
-```{r}
+```{r tbl-ttest}
 #| echo: FALSE
 #| warning: FALSE
 #| tbl-cap: Wages by Union and Non Union Workers
