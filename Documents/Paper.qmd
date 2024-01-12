@@ -221,7 +221,7 @@ Guided by our research questions, we have two hypothesis:
 
 We use five data sets that are joined into two data frames to explore our research questions. We create a data frame that stores information at the national level about income and union wages, and a data frame that stores information at the state level about minimum wages, union employment, and House election results.
 
-When conducting a regression analysis, it demonstrates that the correlation between collective bargaining and political leanings has gotten stronger in the last four decades from 1984 to 2019. Additionally, when conducting t-tests among union and non union wages, there is a statistically significant difference that demonstrates an increasing wage differential over the same time period.
+When conducting a regression analysis, it demonstrates that the correlation between collective bargaining and political representation in the House has gotten stronger in the last four decades from 1984 to 2019. Additionally, when conducting t-tests among union and non union wages, there is a statistically significant difference that demonstrates an increasing wage differential over the same time period.
 
 
 # \[Our Substance and Context Section Title Here\]
@@ -238,6 +238,20 @@ In order to integrate citations into the References section below, we add entrie
 
 # Data and Methods {#sec-data}
 
+The data being analyzed is from a collection of five data sets. The first two data sets, `union_wages` and `union_states` are gathered from Tidy Tuesday, although the original data comes from the Union Membership and Coverage Database at Georgia State University. The  tables relevant to this paper detailed union membership counts by state and year, as well as union and non union wages nationally. The third data set, `house`, is also from Tidy Tuesday, although the original data comes from the MIT Election Data and Science Lab. The data includes every person who ran for a seat in the House of Representatives, but we only selected the election winner. The fourth data set, `income_distribution`, is also from Tidy Tuesday, although the original data comes from the U.S. Census. The data tracks the mean and median income nationally in the United States. The fifth data set, `minimum_wage`, comes from the U.S. Department of Labor and tracks minimum wage at the state level and the federal minimum wage.
+
+ADD SPECIFICS ABOUT CLEANING EACH OF THE DATA SETS, HOW PARTY STATE AVERAGE WAS MADE, ETC
+
+The five data sets are combined into two data sets: one that stores data at the state level and another that stores data at the national level. `full_state_data` joins the `union_states`, `house`, and `minimum_wage` data sets. There are `8730` observations and each row represents a year and a state. `full_ntl_data` joins the `union_wages` and `income_distribution` data sets. There are `36` observations and each row represents a distinct year. Variables regarding union employment are not provided at the national level, only at the state level, so they were summarized and added to the national data set. 
+
+Among the original five data sets, there is data recorded from 1967 to 2022. Not all of the data sets cover that time frame, so once joined into two data sets, the data was filtered to only include the years 1984 to 2019. 
+
+
+
+
+
+
+
 This section describes the data we analyze. We describe the source of the data, and its primary features. We cite our data. We describe the methods we use to answer our question and to test our hypotheses.
 
 If our data were `cars`, loaded in a chunk above, we note that our data have `r nrow(cars)` observations. Our unit of analysis is the cars; each row represents a different car that was measured.
@@ -251,6 +265,8 @@ We explain important decisions and codings in this section. "We collect our data
 Where there are less-critical details that we implement to improve our analysis or presentation, we do not explain them in the paper. Our paper does not say, for example, "we reorder the levels of the factor variable from alphabetical 'high, low, medium' to the sensible 'low, medium, high.'" Of course, we implement that reordering, but it should not appear in our paper.
 
 We cite the software we use. For example, we conduct our analysis using R version `r paste(R.version$major, R.version$minor, sep = ".")` [@rcoreteam23]. We rely on several elements of the `tidyverse` [@wickhamtidyverse]. Of course, we do not cite software that we do not use.
+
+## Wage Data
 
 ```{r fig-cb}
 #| echo: false
@@ -430,7 +446,7 @@ effective_minimum_wage_data |>
        color = "Selected States")
 ```
 
-## House Elections
+## House of Representatives Data
 
 ```{r fig-c}
 #| echo: false
@@ -458,7 +474,7 @@ plot_usmap(data = map_data, values = "party_state_average", color = "black") +
   )
 ```
 
-## Collective Bargaining and Wages
+## Collective Bargaining and Wage Data
 
 ```{r fig-w}
 #| echo: false
@@ -497,7 +513,7 @@ full_ntl_data |>
   )
 ```
 
-## Collective Bargaining and House Elections
+## Collective Bargaining and House of Representatives Data
 
 ```{r fig-y}
 #| echo: false
@@ -537,6 +553,8 @@ full_state_data |>
     color = "Region"
   )
 ```
+
+
 
 # Exploring Correlations: Linear Regression Analyses and T-Tests on Collective Bargaining and Wage Disparities
 
