@@ -252,6 +252,291 @@ Where there are less-critical details that we implement to improve our analysis 
 
 We cite the software we use. For example, we conduct our analysis using R version `r paste(R.version$major, R.version$minor, sep = ".")` [@rcoreteam23]. We rely on several elements of the `tidyverse` [@wickhamtidyverse]. Of course, we do not cite software that we do not use.
 
+```{r fig-cb}
+#| echo: false
+#| fig-cap: Collective Bargaining
+
+per_union_wage_data <- full_state_data |> # This object will be used to create the graph and also in the data subset
+  mutate(
+    map_color = case_when(
+      state_abbreviation == "CA" ~ "CA", # States we would like to highlight. first "" is the state abb, second "" is what will appear in legend
+      state_abbreviation == "AK" ~ "AK",
+      state_abbreviation == "OK" ~ "OK",
+      state_abbreviation == "FL" ~ "FL",
+      state_abbreviation == "HI" ~ "HI",
+      .default = NA
+    )
+  ) 
+States_by_union <- per_union_wage_data |> # use created table here
+  ggplot(aes(x = year)) +
+  geom_line(aes(y = percent_union, group = state_abbreviation),
+            color = "grey75", alpha =0.6) + # using group means the groupings wont appear in legend
+  geom_line(data = subset(per_union_wage_data, # use created object here
+                          !is.na(map_color)), #subset used to keep out non highlighted states
+            aes(y = percent_union, color = map_color),
+            linewidth = .75) +
+  geom_line(data = subset(full_ntl_data, year >= 1984),
+            aes(y = percent_union), color = "orange", linewidth = 1.5) +
+  annotate("text", x=1988, y=.15, label= "Federal Avg", color = "orange", size = 5) +
+  theme_minimal() +
+  scale_x_continuous(breaks = seq(min(per_union_wage_data$year), max(per_union_wage_data$year), by = 4)) + 
+  labs(title = "States by % of Labor Market Covered by Union",
+       x = "Year",
+       y = "% of Labor Market In Union",
+       color = "Selected States")
+States_by_union
+ggsave("../Documents/Graph_Images/States_by_union.png", width=7.29, height=5.41)
+```
+
+```{r fig-a}
+#| echo: false
+#| fig-cap: a
+
+per_collective_wage_data <- full_state_data |> # This object will be used to create the graph and also in the data subset
+  mutate(
+    map_color = case_when(
+      state_abbreviation == "CA" ~ "CA", # States we would like to highlight. first "" is the state abb, second "" is what will appear in legend
+      state_abbreviation == "AK" ~ "AK",
+      state_abbreviation == "HI" ~ "HI",
+      state_abbreviation == "FL" ~ "FL",
+      .default = NA
+    )
+  ) 
+
+per_collective_wage_data |> # use created table here
+  ggplot(aes(x = year)) +
+  geom_line(aes(y = percent_collective_bargain, group = state_abbreviation),
+            color = "grey75", alpha =0.6) + # using group means the groupings wont appear in legend
+  geom_line(data = subset(per_collective_wage_data, # use created object here
+                          !is.na(map_color)), #subset used to keep out non highlighted states
+            aes(y = percent_collective_bargain, color = map_color),
+            linewidth = .75) +
+  geom_line(data = subset(full_ntl_data, year >= 1984),
+            aes(y = percent_collective_bargain), color = "orange", linewidth = 1.5) +
+  annotate("text", x=1988, y=.17, label= "Federal Avg", color = "orange", size = 5) +
+  theme_minimal() +
+  scale_x_continuous(breaks = seq(min(per_collective_wage_data$year), max(per_collective_wage_data$year), by = 4)) + 
+  labs(title = "States by % of Labor Market Covered by a Collective Bargaining Agreement",
+       x = "Year",
+       y = "% of Labor Market in a Collective Bargaining Agreement",
+       color = "Selected States")
+```
+
+```{r fig-wages}
+#| echo: false
+#| fig-cap: Wages 
+
+full_ntl_data |> 
+  filter(year >= 1984) |> 
+  ggplot(aes(x = year)) +
+  geom_line(aes(y = mean_income), color = "red") +
+  annotate("text", x=1995, y=85000, label= "Mean income", color = "red", size = 5) +
+  geom_line(aes(y = median_income), color = "blue") +
+  annotate("text", x=1995, y=65000, label= "Median income", color = "blue", size = 5) +
+  scale_x_continuous(breaks = seq(min(full_ntl_data$year), max(full_ntl_data$year), by = 4)) + 
+  theme_minimal() +
+  labs(
+    title = "Mean and Median Income in the United States Between 1984 and 2019",
+    x = "Year",
+    y = "Income in USD (Adjusted to 2020 values)"
+  )
+```
+
+```{r fig-b}
+#| echo: false
+#| fig-cap: b
+
+full_ntl_data |> 
+  filter(year >= 1984) |> 
+  ggplot(aes(x = year)) +
+  geom_line(aes(y = mean_income_2020_adj), color = "red") +
+  annotate("text", x=1995, y=145000, label= "Mean income", color = "red", size = 5) +
+  geom_line(aes(y = median_income_2020_adj), color = "blue") +
+  annotate("text", x=1995, y=115000, label= "Median income", color = "blue", size = 5) +
+  scale_x_continuous(breaks = seq(min(full_ntl_data$year), max(full_ntl_data$year), by = 4)) + 
+  theme_minimal() +
+  labs(
+    title = "Mean and Median Income in the United States Between 1984 and 2019 (2020 USD)",
+    x = "Year",
+    y = "Income in USD (Adjusted to 2020 values)"
+  )
+```
+
+```{r fig-d}
+#| echo: false
+#| fig-cap: d
+
+state_minimum_wage_data <- full_state_data |> # This object will be used to create the graph and also in the data subset
+  mutate(
+    map_color = case_when(
+      state_abbreviation == "CA" ~ "CA", # States we would like to highlight. first "" is the state abb, second "" is what will appear in legend
+      state_abbreviation == "AK" ~ "AK",
+      state_abbreviation == "OK" ~ "OK",
+      state_abbreviation == "FL" ~ "FL",
+      .default = NA
+    )
+  ) 
+
+state_minimum_wage_data |> # use created table here
+  ggplot(aes(x = year)) +
+  geom_line(aes(y = state_min_wage_2020_adj, group = state_abbreviation),
+            color = "grey75", alpha =0.6) + # using group means the groupings wont appear in legend
+  geom_line(data = subset(state_minimum_wage_data, # use created object here
+                          !is.na(map_color)), #subset used to keep out non highlighted states
+            aes(y = state_min_wage_2020_adj, color = map_color),
+            linewidth = .75) +
+  geom_line(aes(y = fed_min_wage_2020_adj), color = "orange", linewidth = 1.5) + # federal minimum wage
+  annotate("text", x=1990, y=6, label= "Federal Avg", color = "orange", size = 5) +
+  theme_minimal() +
+  scale_x_continuous(breaks = seq(min(state_minimum_wage_data$year), max(state_minimum_wage_data$year), by = 4)) + 
+  labs(title = "State Minimum Wage by Year (Adjusted for 2020 $)",
+       subtitle = "For states with an adjusted effective minimum wage above the federal level",
+       x = "Year",
+       y = "Minimum Wage (Adjusted to 2020 values)",
+       color = "Selected States")
+```
+
+```{r fig-e}
+#| echo: false
+#| fig-cap: e
+
+effective_minimum_wage_data <- full_state_data |> 
+  filter(effective_min_wage_2020_adj != fed_min_wage_2020_adj) |> 
+  mutate(
+    map_color = case_when(
+      state_abbreviation == "CA" ~ "CA",
+      state_abbreviation == "AK" ~ "AK",
+      state_abbreviation == "CT" ~ "CT",
+      state_abbreviation == "HI" ~ "HI",
+      .default = NA
+    )
+  ) 
+
+effective_minimum_wage_data |> 
+  ggplot(aes(x = year)) +
+  geom_line(aes(y = effective_min_wage_2020_adj, group = state_abbreviation),
+            color = "grey75", alpha =0.6) +
+  geom_line(data = subset(effective_minimum_wage_data, !is.na(map_color)),
+            aes(y = effective_min_wage_2020_adj, color = map_color),
+            linewidth = .75) +
+  geom_line(aes(y = fed_min_wage_2020_adj), color = "orange", linewidth = 1.5) +
+  annotate("text", x=1990, y=6, label= "Federal Avg", color = "orange", size = 5) +
+  theme_minimal() +
+  scale_x_continuous(breaks = seq(min(effective_minimum_wage_data$year), max(effective_minimum_wage_data$year), by = 4)) + 
+  labs(title = "State Effective Minimum Wage by Year (Adjusted for 2020 $)",
+       subtitle = "For states with an adjusted effective minimum wage above the federal level",
+       x = "Year",
+       y = "Effective Minimum Wage (Adjusted to 2020 values)",
+       color = "Selected States")
+```
+
+## House Elections
+
+```{r fig-c}
+#| echo: false
+#| fig-cap: c
+
+map_data <- full_state_data |> 
+  select(c("year", "state", "party_state_average")) |> 
+  distinct(year, state, .keep_all = TRUE) |> 
+  filter(year %% 4==0) |> 
+  filter(!is.na(party_state_average)) |> 
+  full_join(
+    tibble(
+      "year" = seq(from=1984, to=2016, by=4),
+      "state" = rep("District of Columbia", 9),
+      "party_state_average" = rep(.5, 9)),
+    by = c("year", "state", "party_state_average")
+    )
+
+plot_usmap(data = map_data, values = "party_state_average", color = "black") +
+  facet_wrap(~year, nrow = 4, ncol= 3) +
+  theme(legend.position = "bottom") +
+  scale_fill_gradient(low = "red", high = "blue", name = "Proportion") +
+  labs(
+    title = "Proportion of House Delegation that is Democratic"
+  )
+```
+
+## Collective Bargaining and Wages
+
+```{r fig-w}
+#| echo: false
+#| fig-cap: w
+
+full_ntl_data |> 
+  ggplot(aes(x = year)) +
+  geom_line(aes(y = union_wage_2020_adj), color = "blue") +
+  annotate("text", x=1993, y=28, label= "Union Wages", color = "blue", size = 5) +
+  geom_line(aes(y = nonunion_wage_2020_adj), color = "red") +
+  annotate("text", x=1993, y=22, label= "Non Union Wages", color = "red", size = 5) +
+  scale_x_continuous(breaks = seq(min(full_ntl_data$year), max(full_ntl_data$year), by = 4)) + 
+  theme_minimal() +
+  labs(
+    title = "Union vs. Non Union Wages Over Time",
+    x = "Year",
+    y = "Wages (Adjusted to 2020 values)"
+  )
+```
+
+```{r fig-x}
+#| echo: false
+#| fig-cap: x
+
+full_ntl_data |> 
+  ggplot(aes(x = percent_collective_bargain)) +
+  geom_point(aes(y = nonunion_wage_2020_adj), color = "blue") +
+  geom_jitter(aes(y = union_wage_2020_adj), color = "red") +
+  theme_light() +
+  facet_wrap(~decade) +
+  labs(
+    title = "Union vs. Non-Union Wages by Decade",
+    subtitle = "Red represents union wages and blue represents non-union wages",
+    x = "Percent of Workers Under Collective Bargaining Agreement",
+    y = "Wages (Adjusted to 2020 values)"
+  )
+```
+
+## Collective Bargaining and House Elections
+
+```{r fig-y}
+#| echo: false
+#| fig-cap: y
+
+full_state_data |> 
+  filter(year %% 4==0) |>
+  ggplot(aes(x = percent_collective_bargain, y = party_state_average)) +
+  geom_jitter(aes(color = regions), alpha = 0.5, width = 0.1, height = 0.1) +
+  geom_smooth(method = "lm", color = "black") +
+  facet_wrap(~decade) +
+  theme_light() +
+  labs(
+    title = "% Collective Bargaining vs Proportion of House Delegation That is Democratic",
+    x = "Percent of Workers Covered by Collective Bargaining",
+    y = "Proportion of House Delegation that is Democratic",
+    color = "Region"
+  )
+```
+
+```{r fig-z}
+#| echo: false
+#| fig-cap: z
+
+full_state_data |> 
+  filter(year %% 4==0) |>
+  ggplot(aes(x = percent_collective_bargain, y = party_state_average)) +
+  geom_jitter(aes(color = regions), alpha = 0.15, width = 0.1, height = 0.1) +
+  geom_smooth(method = "lm", aes(group = regions, color = regions), se = FALSE) +
+  facet_wrap(~decade) +
+  theme_light() +
+  labs(
+    title = "% Collective Bargaining vs Proportion of House Delegation That is Democratic",
+    subtitle = "Regressed by Region",
+    x = "Percent of Workers Covered by Collective Bargaining",
+    y = "Proportion of House Delegation that is Democratic",
+    color = "Region"
+  )
+```
 
 # Exploring Correlations: Linear Regression Analyses and T-Tests on Collective Bargaining and Wage Disparities
 
