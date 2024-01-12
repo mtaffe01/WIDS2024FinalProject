@@ -16,7 +16,7 @@ date-format: iso
 documentclass: article
 editor: source
 abstract: "For our project, our goal is to examine the relationships between collective bargaining agreements, U.S. house election results, and incomes/wages of Americans. The motivation for this project is the rise in wealth inequality and populism in America and the recent surge in union activity. In our project, we find that all three metrics are related. Using regression testing we show that for unions and political leanings, this relationship has surged and deepened in the last four decades from 1984 to 2019"
-#bibliography: main.bib
+bibliography: myref.bib
 ---
 
 ```{r setup}
@@ -224,45 +224,23 @@ We use five data sets that are joined into two data frames to explore our resear
 When conducting a regression analysis, it demonstrates that the correlation between collective bargaining and political representation in the House has gotten stronger in the last four decades from 1984 to 2019. Additionally, when conducting t-tests among union and non union wages, there is a statistically significant difference that demonstrates an increasing wage differential over the same time period.
 
 
-# \[Our Substance and Context Section Title Here\]
+# Historical Reference and Overlap Points of Union Wages and Effects of Collective Bargaining Agreements
 
-Analyzing Union Datasets along with US House of Representative Data allowed us to examine and search for correlation between wages and the increase/decrease of Union participation in national regions. We investigated decreases in wages and union participation, along with widening gaps in income between non union, and union members, and the overall increases in wages. Our study found strong correlation with Western and Rosenfeld's (2011) Unions, norms and the rise in the U.S. wage inequality which found “The decline of organized labor in the United States coincided with a large increase in wage inequality. From 1973 to 2007”. 
+Analyzing Union data sets along with US House of Representative Data allowed us to examine and search for correlation between wages and the increase/decrease of Union participation in national regions. We investigated decreases in wages and union participation, along with widening gaps in income between non union, and union members, and the overall increases in wages. Our study found strong correlation with @western2011unions. Unions, norms and the rise in the U.S. wage inequality which found “The decline of organized labor in the United States coincided with a large increase in wage inequality. From 1973 to 2007.” 
 
-Our graphs convey, and affirm Nathan Wilmers (2017) reference point that “even in a period of labor weakness (2000 -2014), union activism increases the wages of union members. Utilizing the House of Representative data set of both Democrats and Republicans we also were able to find correlation between the downward slope in union wages and enrollment during a Republican presidency which also came with a large republican majority in the house during the Bush administration. Particularly since the early 2000s, when the Bush administration’s NLRB appointments led to a series of decisions that were especially hostile to organized labor (Liebman 2007; Farber 2014) Milkman, Ruth (2017)
+Our graphs convey, and affirm @wilmers2017labor, reference point that “even in a period of labor weakness (2000 -2014), union activism increases the wages of union members. Utilizing the House of Representative data set of both Democrats and Republicans we also were able to find correlation between the downward slope in union wages and enrollment during a Republican presidency which also came with a large republican majority in the house during the Bush administration. Particularly since the early 2000s, when the Bush administration’s NLRB appointments led to a series of decisions that were especially hostile to organized labor (Liebman 2007; Farber 2014) @milkman2017labor.
 
-
-We cite at least three published, peer-reviewed scholarly works. For example, we could cite @mooree20 or @moorav12[^1], which we discussed in class.[^2] We only cite others' work in our paper when it enhances the reader's understanding of what we, the authors of this paper, are doing. We connect everything we cite to *our* investigation; this is our original research, not a book report or an annotated bibliography.
-
-[^1]: There should always be a space before the "(" in a citation date.
-
-[^2]: To cite a paper within parentheses, use, e.g., [@moore12].
-
-We do not cite paper titles or journal names, unless our paper is about someone else's paper or about the set of articles in a journal. We do not cite authors' first, given names. We can refer to either what an author does, or what a paper does, but we should be consistent. For example, "@moorav12 argue that we should \ldots" refers to what the authors do; "@moorav12 argues that we should \ldots" refers to what the paper -- @moorav12 -- does.
-
-In order to integrate citations into the References section below, we add entries into our file `main.bib`. This is a plain-text file that we edit in RStudio. We store `main.bib` in the same folder as our paper's `.qmd` and `.pdf` files. Its entries are formatted so that they can be knit to `.pdf`; see [https://j.mp/2UzTXEZ](https://www.overleaf.com/learn/latex/Bibliography_management_with_bibtex#The_bibliography_file) for example entries for articles, books, and miscellaneous. We can get these entries automatically from Google Scholar by turning on BibTeX in the Google Scholar Settings - Bibliography Manager. Perhaps we use a tool like free, open-source BibDesk to help us manage the `.bib` file.
 
 # Data and Methods {#sec-data}
 
-The data being analyzed is from a collection of five data sets. The first two data sets, `union_wages` and `union_states` are gathered from Tidy Tuesday, although the original data comes from the Union Membership and Coverage Database at Georgia State University. The  tables relevant to this paper detail union membership counts by state and year, as well as union and non union wages nationally. The third data set, `house`, is also from Tidy Tuesday, although the original data comes from the MIT Election Data and Science Lab. The data includes every person who ran for a seat in the House of Representatives, but we only selected the election winner. The fourth data set, `income_distribution`, is also from Tidy Tuesday, although the original data comes from the U.S. Census. The data tracks the mean and median income nationally in the United States. The fifth data set, `minimum_wage`, comes from the U.S. Department of Labor and tracks minimum wage at the state level and the federal minimum wage.
+The data being analyzed is from a collection of five data sets. The first two data sets, `union_wages` and `union_states` are gathered from Tidy Tuesday, although the original data comes from the Union Membership and Coverage Database at Georgia State University. @Uniondata The  tables relevant to this paper detail union membership counts by state and year, as well as union and non union wages nationally. The third data set, `house`, is also from Tidy Tuesday, although the original data comes from the MIT Election Data and Science Lab. @Housedata The data includes every person who ran for a seat in the House of Representatives, but we only selected the election winner. The fourth data set, `income_distribution`, is also from Tidy Tuesday, although the original data comes from the U.S. Census. @Wealthdata The data tracks the mean and median income nationally in the United States. The fifth data set, `minimum_wage`, comes from the U.S. Department of Labor and tracks minimum wage at the state level and the federal minimum wage. @MinWagedata
 
 All of the data sets undergo basic cleaning so that the columns are correctly formatted, variable names are consistent, so there are no NA values, and relevant variables are selected. For the house election data, the table is manipulated so that only rows of candidates who won their election remain. A binary variable is created in which we code the outcome as 1 if the winner was a Democrat and code the outcome as 0 if the winner was a Republican. An additional variable is created to show the proportion of the House delegation that is democratic for every combination of years and states. For the union data, it is filtered to not include union sectors, such as construction unions, and instead look at all unions. For the income distribution data, race is filtered out because it is outside of the scope of this study.
 
 The five data sets are combined into two data sets: one that stores data at the state level and another that stores data at the national level. `full_state_data` joins the `union_states`, `house`, and `minimum_wage` data sets. There are `8730` observations and each row represents a year and a state. `full_ntl_data` joins the `union_wages` and `income_distribution` data sets. There are `36` observations and each row represents a distinct year. Variables regarding union employment are not provided at the national level, only at the state level, so they were summarized and added to the national data set. Economic variables in the national data are not originally adjusted to 2020 values, so we calculate the rate from the state data that contains adjusted and non-adjusted values for federal minimum wage, and then apply that rate to the national data. This allows all of the economic data to be standardized and account for inflation. Among the original five data sets, there is data recorded from 1967 to 2022. Not all of the data sets cover that time frame, so once joined into two data sets, the data was filtered to only include the years 1984 to 2019. 
 
-With two cleaned data sets, we conduct our exploratory data analysis using R version `r paste(R.version$major, R.version$minor, sep = ".")` [@rcoreteam23]. We rely on several elements of the `tidyverse` [@wickhamtidyverse].
 
-
-
-
-
-
-We cite our data. We describe the methods we use to answer our question and to test our hypotheses.
-
-"Our outcome is stopping distance measured in feet." We state our key predictor and how it is measured: "Our key predictor is the car's speed, measured in miles per hour."
-
-We almost never refer to specific variable, object, function, or data frame names (such as `var_x`, `ourdata`, `this_useful_func`, or `df`). These particular names are almost never of interest or use to the reader.
-
-
+\clearpage
 ## Union Data
 
 ```{r fig-uniondata}
@@ -299,6 +277,9 @@ per_collective_wage_data |> # use created table here
        y = "% of Labor Market in a CB Agreement",
        color = "Selected States")
 ```
+@fig-uniondata shows what is commonly known about collective bargaining agreements in the United States: they have been on the decline since at least the 1980s. Unfortunately our data does not extend to the last four years where some reports indicate union membership is on the rise. Early on, we can see that southern and more Republican leaning states have lower collective bargaining rates than more Democrat and northern / western states. There is a very small bump in membership in 2008, which we hypothesize happened in relation to the 2008 financial crisis.
+
+\clearpage
 
 ## Income Data
 ```{r fig-incomedata}
@@ -322,6 +303,8 @@ full_ntl_data |>
   )
 ```
 
+\clearpage
+
 ```{r fig-incomedataadj}
 #| echo: false
 #| warning: FALSE
@@ -342,6 +325,10 @@ full_ntl_data |>
     y = "Income in USD (Adjusted to 2020 values)"
   )
 ```
+
+@fig-incomedata and @fig-incomedataadj show that unadjusted income increases, but when accounting for inflation, Americans are earning less per year now than they did 4 decades ago. As we will see later on when examining wage data at a national level, there are numerous external reasons for this. Most notably, an aging population that is no longer working is likely driving the average down. It is possible that the average worker is earning more but we do not have the data to verify this.
+
+\clearpage
 
 ```{r fig-wagedata}
 #| echo: false
@@ -378,6 +365,10 @@ effective_minimum_wage_data |>
        color = "Selected States")
 ```
 
+@fig-wagedata removes all data points where the state effective minimum wage falls below the federal amount. From this we can see that more states are taking it into their own hands to protect workers rights. We see a large jump in 2007 which may be related to the financial crisis. There is another spike around 2014.
+
+\clearpage
+
 ## House of Representatives Data
 
 ```{r fig-housedata}
@@ -407,6 +398,10 @@ plot_usmap(data = map_data, values = "party_state_average", color = "black") +
   )
 ```
 
+In @fig-housedata we see that, especially in the northern-central states, the country has grown to be more Republican in the last 4 decades. However, in the last 10 years this has begun to shift again. During this whole time, it appears that New England has become more Democratic. It is important to note that the states in the north-central region typically have only one to three representatives which can make changes appeaer much more drastic than they actually are.
+
+\clearpage
+
 ## Collective Bargaining and Wage Data
 
 ```{r fig-unionwagedata}
@@ -429,6 +424,10 @@ full_ntl_data |>
   )
 ```
 
+@fig-unionwagedata is rather unintuitive, as we would expect adjusted wages to be decreasing in this time, based on @fig-incomedataadj. There are a number of potential causes for this. First, Americans work less hours today than they did in 1980. Second, and more likely, is that the income variables we used includes those who are not working. As the U.S. experiences a graying of society, this could be driving down mean incomes.
+
+\clearpage
+
 ```{r fig-collectivebargain}
 #| echo: false
 #| warning: FALSE
@@ -447,6 +446,10 @@ full_ntl_data |>
     y = "Wages (Adjusted to 2020 values)"
   )
 ```
+
+@fig-collectivebargain is incredibly interesting. First, a quick view of this graph shows the exact opposite of our hypothesis. Looking at each decade, we see collective bargaining rates decreasing and wage increasing. Then, in each decade that relationship continues. Still, we can see that in every decade, a collective bargaining agreement is associated with higher wages than for a worker over non-collective-bargaining-jobs. However, by the 2010s, it appears that the distance between union and non union wages are shrinking. Still, this finding should be taken in the context that the graph does not account for the number of workers in each category and other confounding variables.
+
+\clearpage
 
 ## Collective Bargaining and House of Representatives Data
 
@@ -470,6 +473,10 @@ full_state_data |>
   )
 ```
 
+@fig-collectivebargaindecade demonstrates the political association with collective bargaining agreements over the last 4 decades In the 1980s, there was almost no relationship between collective bargaining agreements and party affiliation, as seen by the horizontal regression line. However, by the 2010s, there is a significant increase in slope.
+
+\clearpage
+
 ```{r fig-collectivebargainregion}
 #| echo: false
 #| warning: FALSE
@@ -491,7 +498,9 @@ full_state_data |>
   )
 ```
 
+In @fig-collectivebargainregion we can see that the North Central and South regions are the main drivers behind this, seen in the steepening of the regression slope.
 
+\clearpage
 
 # Exploring Correlations: Linear Regression Analyses and T-Tests on Collective Bargaining and Wage Disparities
 
@@ -500,7 +509,7 @@ Based on our exploratory data analysis, we are conducting linear regression anal
 
 ## Predicting Democratic House Delegations with Percentage of Workers in Collective Bargaining Argreements
 
-@tbl-linear performs a linear regression between the percent of workers in a collective bargaining agreement and the proportion of the House delegation that is Democratic for the 1980s and 2010s in each region, as well as for all of the regions combined 
+Building on the results in @fig-collectivebargaindecade and @fig-collectivebargainregion, @tbl-linear performs a linear regression between the percent of workers in a collective bargaining agreement and the proportion of the House delegation that is Democratic for the 1980s and 2010s in each region, as well as for all of the regions combined 
 
 ```{r linearmodel}
 #| echo: false
@@ -557,6 +566,7 @@ CB_party_regression <- full_join(CB_party_regression, CB_party_temp,
 
 ```
 
+
 ```{r tbl-linear}
 #| echo: false
 #| message: false
@@ -600,6 +610,8 @@ qqnorm(regression_1980s$resi)
 qqline(regression_1980s$resi)
 ```
 
+\clearpage
+
 ```{r fig-qqplot2010s}
 #| echo: false
 #| fig-cap: QQ Plot 2010s
@@ -612,9 +624,11 @@ qqline(regression_2010s$resi)
 ```
 The QQ plot in @fig-qqplot1980s from the 1980s shows a very bimodal distribution, while the QQ plot in @fig-qqplot2010s from the 2010s regression model shows a more normal, slightly light-tailed distribution.
 
+\clearpage
+
 ## Comparing Wages between Union and Non Union Workers
 
-Our results seen in @tbl-ttest for these t-tests determine if there is a statistically significant difference between union wages and non union wages in the 1980s and the 2010s.
+Building on the results in @fig-collectivebargain, our results seen in @tbl-ttest for these t-tests determine if there is a statistically significant difference between union wages and non union wages in the 1980s and the 2010s.
 
 ```{r ttest}
 #| echo: FALSE
@@ -659,14 +673,11 @@ tab |>
 
 From our data analysis it can be inferred that collective bargaining agreements have become a very political concept. The charts in our exploratory data analysis and regression models show this. This partially supports our hypothesis. While the correlation is a newer phenomenon, the relationship appears to be strong today. The relationship between unions and wages/income in the United States is much harder to draw inferences. While our t-tests and some charts show that unions can help workers earn more, other graphs show that unions have a negative effect on incomes. Our second hypothesis thus remains without strong support.
 
+There are multiple limitations to our project that we found during our research, that we hope to address in future research. First, our regression models could be improved by adding a time series element to the model. Furthermore, using a multiple linear regression model instead of multiple SLR models. For instance, in an MLR model with a time series element, we could take into account the success of unions in a given time period and state. We could also include other socioeconomic factors at the state level such as housing prices and general costs of living.  This would provide a more accurate image of what trends are occurring in the data. Next, data past 2019 would provide useful insights into the union work done by the Biden administration. Finally, with more variables we may be able to expose more nuanced relationships. Two example of this would be union wages and other income indicators at the state level and election data for the U.S. Senate and individual state legislatures.
+
+Overall, in our project, we were able to provide merit to our first hypothesis, showing a growing relationship between collective bargaining agreement rates and house delegation makeup. We were not able to substantiate our second hypothesis as some of our graphs showed the opposite of our predictions while others and our t-test did indicate our predictions were correct.
 
 
-
--   Union wage data at the state level
--   Data past 2019
--   A greater amount and complexity of models
-
-We remind the reader what this paper was about, why it was important, and what we found. We reflect on limitations of the data or methods. If we have specific advice for someone picking up where we leave off, we provide that guidance. We avoid making trite statements like "more research should be done".
 
 \clearpage
 
