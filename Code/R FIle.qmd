@@ -655,11 +655,14 @@ CB_party_regression <- full_join(CB_party_regression, CB_party_temp,
 Graph of regression estimate by decade and year
 ```{r}
 ggplot(CB_party_regression, aes(x = Decade, y = Estimate, fill = Region)) +
-  geom_bar(stat = "identity", position = "dodge", color = ifelse(CB_party_regression$P_Value > 0.05, "black", NA), linewidth = 0.2) +
+  geom_bar(stat = "identity", position = "dodge") +
+  geom_text(aes(label = sprintf("P=%.3f", P_Value)),
+             position = position_dodge(width = 0.9),
+             vjust = -0.2,
+             size = 3) +
   theme_minimal() +
   labs(title = "Linear Regression Estimate by Decade",
        subtitle = "Model of Percent Collective Bargaining vs Proportion of House Delegation That is Democratic")
 ```
-
 
 ## Conclusion
