@@ -326,6 +326,7 @@
 
 <section id="title-slide" class="quarto-title-block center">
   <h1 class="title">WIDS 2024 Final Presentation</h1>
+  <p class="subtitle">Comparing Collective Bargaining, Income, and House Election data</p>
 
 <div class="quarto-title-authors">
 <div class="quarto-title-author">
@@ -338,22 +339,39 @@ Michael Taffe, Melanie Klein, Ramiro Arevalo
 </section>
 <section id="project-abstract" class="slide level2">
 <h2>Project Abstract</h2>
-<p>For our project, our goal was to examine the relationships between collective bargaining agreements, U.S. house election results, and incomes of Americans. The motivation for this project is the rise in wealth inequality in America, the rise of populism in America, and the recent surge in union activity. In our project, we found that all three metrics are related. Using regression testing we show that for unions and political leanings, this relationship has surged and deepened in the last forty years.</p>
+<p>For our project, our goal is to examine the relationships between collective bargaining agreements, U.S. house election results, and incomes/wages of Americans. The motivation for this project is the rise in wealth inequality and populism in America and the recent surge in union activity. In our project, we find that all three metrics are related. Using regression testing we show that for unions and political leanings, this relationship has surged and deepened in the last forty years.</p>
 </section>
 <section id="literature-review" class="slide level2">
 <h2>Literature Review</h2>
+</section>
+<section id="project-question" class="slide level2">
+<h2>Project Question</h2>
+<p>The research questions we used to guide our analysis:</p>
+<ol type="1">
+<li>Is there any relationship between collective bargaining rates among workers to house delegation makeup?</li>
+<li>Is there any relationship between collective bargaining rates among workers and wages?</li>
+<li>Do collective bargaining rates effect wealth inequality?</li>
+</ol>
+</section>
+<section id="hypotheses" class="slide level2">
+<h2>Hypotheses</h2>
+<p>Guided by our questions we have two hypotheses:</p>
+<ol type="1">
+<li><p>There is a significant correlation between collective bargaining rates and higher amounts of Democrat representation.</p></li>
+<li><p>Unions will lead to higher wages.</p></li>
+</ol>
 </section>
 <section id="about-the-data-pt.-1" class="slide level2 smaller">
 <h2>About the Data pt.&nbsp;1</h2>
 <ul>
 <li><strong>Union data</strong>
 <ul>
-<li>Gathered from Tidy Tuesday, although the original data comes from the Union Membership and Coverage Database at Georgia state university</li>
+<li>Gathered from Tidy Tuesday, although the original data comes from the Union Membership and Coverage Database at Georgia State University.</li>
 <li>For our project, the relevant tables include one that details union membership counts by state by year and another that tracks union and non union wages by year.</li>
 </ul></li>
 <li><strong>House election data</strong>
 <ul>
-<li>Also gathered from Tidy Tuesday’s repository, this data originally came from the MIT Election Data and Science Lab</li>
+<li>Also gathered from Tidy Tuesday’s repository, this data originally came from the MIT Election Data and Science Lab.</li>
 <li>The variables we selected from the data set were year, state, district, and election winner</li>
 </ul></li>
 </ul>
@@ -363,36 +381,37 @@ Michael Taffe, Melanie Klein, Ramiro Arevalo
 <ul>
 <li><strong>Wage</strong>
 <ul>
-<li>Our wage data was obtained through the U.S. Department of Labor and Tidy Tuesday (originally from U.S. census data)</li>
-<li>This data tracked the mean and median income nationally in the United States</li>
-<li>Another table tracked minimum wage at the state level</li>
+<li>Our wage data was obtained through Kaggle that pulls data from the U.S. Department of Labor and Tidy Tuesday (originally from U.S. census data).</li>
+<li>The data obtained through Kaggle data tracked tracked minimum wage at the state level.</li>
+<li>The Tidy Tuesday data contained the mean and median income nationally in the United States.</li>
 </ul></li>
 </ul>
 </section>
 <section id="data-manipulation-pt.-1" class="slide level2 smaller">
 <h2>Data manipulation pt.&nbsp;1</h2>
 <ul>
-<li>All of our data had undergone basic cleaning before we downloaded it so all of the columns were correctly formatted and there was almost 0 NA values</li>
-<li>each data set was pared down so that only the variables relevant to our project was completed.</li>
-<li>for our house election data, the table was manipulated so that only rows of candidates who won their election remained.
+<li>All of our data had undergone basic cleaning before we downloaded it so all of the columns were correctly formatted and there was almost 0 NA values.</li>
+<li>Each data set was pared down so that only the variables relevant to our project was completed.</li>
+<li>For our house election data, the table was manipulated so that only rows of candidates who won their election remained.
 <ul>
-<li>other minor changes included renaming variables and recoding a few outlier observations in the <code>party</code> variable</li>
+<li>Other minor changes included renaming variables and recoding a few outlier observations in the <code>party</code> variable.</li>
 </ul></li>
-<li>For the union data, we filtered the datasets down to not include union sectors (ex. construction-unions) and added columns to adjust for inflation</li>
+<li>For the union data, we filtered the data sets down to not include union sectors (ex. construction-unions).</li>
 <li>For our wage data, we filtered out race, as this was outside of the scope of our study.</li>
 </ul>
 </section>
-<section id="data-manipulation-pt.-2" class="slide level2 smaller">
+<section id="data-manipulation-pt.-2" class="slide level2">
 <h2>Data manipulation pt.&nbsp;2</h2>
 <ul>
 <li>Our last data manipulation was combining all of our tables into two data sets: one that stores data at a national level, and another that stores data at a state level.</li>
-<li>some of the variables were only provided at the state level so they were summarized and added to the national data set.</li>
+<li>Inflation adjusted values added to national data set.</li>
+<li>Some of the variables were only provided at the state level so they were summarized and added to the national data set.</li>
 </ul>
 </section>
-<section id="eda-pt.-1-overview" class="slide level2 smaller">
+<section id="eda-pt.-1-overview" class="slide level2">
 <h2>EDA pt.&nbsp;1: Overview</h2>
 <ul>
-<li>EDA was split into five sections: wage data, union data, house data, wage data’s associations with union data, and union data’s association with house data. We did not have the relevant wage data to compare wages and house elections</li>
+<li>EDA was split into five sections: wage data, union data, house data, wage data’s associations with union data, and union data’s association with house data. We did not have the relevant wage data to compare wages and house elections.</li>
 </ul>
 </section>
 <section id="eda-pt.-2-wage-data" class="slide level2 smaller">
@@ -401,7 +420,7 @@ Michael Taffe, Melanie Klein, Ramiro Arevalo
 <div class="column" style="width:60%;">
 <ul>
 <li>Incomes, when adjusted for inflation, have been decreasing since 1984. Surprisingly, our data shows income inequality has remained stagnant over the last forty years.</li>
-<li>Minimum wages, which had been stagnant since 2009, began to grow again in 2016, although the federal rate has remained stagnant</li>
+<li>Minimum wages, which had been stagnant since 2009, began to grow again in 2016, although the federal rate has remained stagnant.</li>
 </ul>
 </div><div class="column" style="width:40%;">
 <p><img data-src="./Graph_Images/Income_by_year_adj.png" alt="Plot 1"> <img data-src="./Graph_Images/Eff_wage_by_state.png" alt="Plot 2"></p>
@@ -431,7 +450,7 @@ Michael Taffe, Melanie Klein, Ramiro Arevalo
 <div class="columns">
 <div class="column" style="width:60%;">
 <ul>
-<li>The country has generally grown more republican in the last 40 years, although data in the last 10 years show the pendulum might now be swinging the other way
+<li>The country has generally grown more republican in the last 40 years, although data in the last 10 years show the pendulum might now be swinging the other way.
 <ul>
 <li>Northern-midwest states have had the biggest shift to the right. New England is the only region that has seen a shift left.</li>
 </ul></li>
@@ -469,7 +488,7 @@ Michael Taffe, Melanie Klein, Ramiro Arevalo
 <div class="columns">
 <div class="column" style="width:60%;">
 <ul>
-<li>Unions have become a very political topic in the last 40 years</li>
+<li>Unions have become a very political topic in the last 40 years.</li>
 <li>This trend appears to be driven by the north central and south regions.</li>
 </ul>
 </div><div class="column" style="width:40%;">
@@ -482,7 +501,7 @@ Michael Taffe, Melanie Klein, Ramiro Arevalo
 <div class="columns">
 <div class="column" style="width:60%;">
 <ul>
-<li>Regression</li>
+<li>Our regression analysis shows that the south and north central regions in the United States are the main regions that have seen union membership rates and political leanings show increased correlation.</li>
 <li>T-test between union and non union wages
 <ul>
 <li>1980s: t = 22.846, df = 9.4096, p-value = 1.462e-09
@@ -509,12 +528,12 @@ Michael Taffe, Melanie Klein, Ramiro Arevalo
 </section>
 <section id="conclusion" class="slide level2 smaller">
 <h2>Conclusion</h2>
-<p>From our data analysis it can be infered that collective bargaining agreements have become a very political concept. The charts in our exploratory data analysis and regression models show this. The relationship between unions and wages/income in the United States is much harder to draw inferences. While our t-tests and some charts show that unions can help workers earn more, other graphs show that unions have a negative effect on incomes.</p>
+<p>From our data analysis it can be inferred that collective bargaining agreements have become a very political concept. The charts in our exploratory data analysis and regression models show this. This partially supports our hypothesis. While the correlation is a newer phenomenon, the relationship appears to be strong today. The relationship between unions and wages/income in the United States is much harder to draw inferences. While our t-tests and some charts show that unions can help workers earn more, other graphs show that unions have a negative effect on incomes. Our second hypothesis thus remains without strong support.</p>
 </section>
 <section id="where-we-would-take-our-project-in-the-future" class="slide level2 smaller">
 <h2>Where we would take our project in the future</h2>
 <ul>
-<li>Wage data at the state level</li>
+<li>Union wage data at the state level</li>
 <li>Data past 2019</li>
 <li>A greater amount and complexity of models</li>
 </ul>
@@ -526,6 +545,10 @@ Michael Taffe, Melanie Klein, Ramiro Arevalo
 </section>
 <section id="bibliography" class="slide level2 smaller">
 <h2>Bibliography</h2>
+<p>“Johnthegeek”. 2021. “Wealth and income over time.” GitHub. https://github.com/rfordatascience/tidytuesday/blob/master/data/2021/2021-02-09/readme.md.</p>
+<p>“Johnthegeek”. 2023. “Union Membership in the United States.” GitHub. https://github.com/rfordatascience/tidytuesday/blob/master/data/2023/2023-09-05/readme.md.</p>
+<p>“Johnthegeek”. 2023. “US House Election Results.” GitHub. https://github.com/rfordatascience/tidytuesday/blob/master/data/2023/2023-11-07/readme.md.</p>
+<p>“LisleJoem”. 2021. “US Minimum Wage by State from 1968 to 2020 and 2020 Equivalent Dollars.” Kaggle. https://www.kaggle.com/datasets/lislejoem/us-minimum-wage-by-state-from-1968-to-2017.</p>
 <div class="footer footer-default">
 
 </div>

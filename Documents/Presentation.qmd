@@ -44,9 +44,9 @@ Guided by our questions we have two hypotheses:
 ## About the Data pt. 2 {.smaller}
 
 -   **Wage**
-    -   Our wage data was obtained through the U.S. Department of Labor and Tidy Tuesday (originally from U.S. census data).
-    -   This data tracked the mean and median income nationally in the United States.
-    -   Another table tracked minimum wage at the state level.
+    -   Our wage data was obtained through Kaggle that pulls data from the U.S. Department of Labor and Tidy Tuesday (originally from U.S. census data).
+    -   The data obtained through Kaggle data tracked tracked minimum wage at the state level.
+    -    The Tidy Tuesday data contained the mean and median income nationally in the United States.
 
 ## Data manipulation pt. 1 {.smaller}
 
@@ -54,12 +54,13 @@ Guided by our questions we have two hypotheses:
 -   Each data set was pared down so that only the variables relevant to our project was completed.
 -   For our house election data, the table was manipulated so that only rows of candidates who won their election remained.
     -   Other minor changes included renaming variables and recoding a few outlier observations in the `party` variable.
--   For the union data, we filtered the datasets down to not include union sectors (ex. construction-unions) and added columns to adjust for inflation.
+-   For the union data, we filtered the data sets down to not include union sectors (ex. construction-unions).
 -   For our wage data, we filtered out race, as this was outside of the scope of our study.
 
 ## Data manipulation pt. 2
 
 -   Our last data manipulation was combining all of our tables into two data sets: one that stores data at a national level, and another that stores data at a state level.
+-   Inflation adjusted values added to national data set.
 -   Some of the variables were only provided at the state level so they were summarized and added to the national data set.
 
 ## EDA pt. 1: Overview
@@ -141,7 +142,7 @@ Guided by our questions we have two hypotheses:
         -   mean of x = 26.306; mean of y = 20.375
         -   95% CI: (5.347, 6.514)
     -   2010s: t = 22.846, df = 9.4096, p-value = 1.462e-09
-        -   mean of x = 3.786; mean of y = 25.664
+        -   mean of x = 30.533; mean of y = 25.664
         -   95% CI: (3.786, 5.952)
 :::
 
