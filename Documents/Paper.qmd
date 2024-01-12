@@ -226,7 +226,12 @@ When conducting a regression analysis, it demonstrates that the correlation betw
 
 # \[Our Substance and Context Section Title Here\]
 
-Here we go deeper into the intellectual debate, the political and social context of our investigation. To give the reader a clear sense of why we are writing this paper, we describe the relevant scholarly, technical, or popular literature. We give this section a meaningful *substantive* title; it is not entitled "Literature Review", for example. We cite at least three published, peer-reviewed scholarly works. For example, we could cite @mooree20 or @moorav12[^1], which we discussed in class.[^2] We only cite others' work in our paper when it enhances the reader's understanding of what we, the authors of this paper, are doing. We connect everything we cite to *our* investigation; this is our original research, not a book report or an annotated bibliography.
+Analyzing Union Datasets along with US House of Representative Data allowed us to examine and search for correlation between wages and the increase/decrease of Union participation in national regions. We investigated decreases in wages and union participation, along with widening gaps in income between non union, and union members, and the overall increases in wages. Our study found strong correlation with Western and Rosenfeld's (2011) Unions, norms and the rise in the U.S. wage inequality which found “The decline of organized labor in the United States coincided with a large increase in wage inequality. From 1973 to 2007”. 
+
+Our graphs convey, and affirm Nathan Wilmers (2017) reference point that “even in a period of labor weakness (2000 -2014), union activism increases the wages of union members. Utilizing the House of Representative data set of both Democrats and Republicans we also were able to find correlation between the downward slope in union wages and enrollment during a Republican presidency which also came with a large republican majority in the house during the Bush administration. Particularly since the early 2000s, when the Bush administration’s NLRB appointments led to a series of decisions that were especially hostile to organized labor (Liebman 2007; Farber 2014) Milkman, Ruth (2017)
+
+
+We cite at least three published, peer-reviewed scholarly works. For example, we could cite @mooree20 or @moorav12[^1], which we discussed in class.[^2] We only cite others' work in our paper when it enhances the reader's understanding of what we, the authors of this paper, are doing. We connect everything we cite to *our* investigation; this is our original research, not a book report or an annotated bibliography.
 
 [^1]: There should always be a space before the "(" in a citation date.
 
@@ -289,9 +294,9 @@ per_collective_wage_data |> # use created table here
   annotate("text", x=1988, y=.17, label= "Federal Avg", color = "orange", size = 5) +
   theme_minimal() +
   scale_x_continuous(breaks = seq(min(per_collective_wage_data$year), max(per_collective_wage_data$year), by = 4)) + 
-  labs(title = "States by % of Labor Market Covered by a Collective Bargaining Agreement",
+  labs(title = "States by % of Labor Market Covered by a CB Agreement",
        x = "Year",
-       y = "% of Labor Market in a Collective Bargaining Agreement",
+       y = "% of Labor Market in a CB Agreement",
        color = "Selected States")
 ```
 
@@ -311,7 +316,7 @@ full_ntl_data |>
   scale_x_continuous(breaks = seq(min(full_ntl_data$year), max(full_ntl_data$year), by = 4)) + 
   theme_minimal() +
   labs(
-    title = "Mean and Median Income in the United States Between 1984 and 2019",
+    title = "Mean and Median Income in the United States",
     x = "Year",
     y = "Income in USD"
   )
@@ -332,7 +337,7 @@ full_ntl_data |>
   scale_x_continuous(breaks = seq(min(full_ntl_data$year), max(full_ntl_data$year), by = 4)) + 
   theme_minimal() +
   labs(
-    title = "Mean and Median Income in the United States Between 1984 and 2019 (2020 USD)",
+    title = "Mean and Median Income in the United States (2020 USD)",
     x = "Year",
     y = "Income in USD (Adjusted to 2020 values)"
   )
@@ -366,7 +371,7 @@ effective_minimum_wage_data |>
   annotate("text", x=1990, y=6, label= "Federal Avg", color = "orange", size = 5) +
   theme_minimal() +
   scale_x_continuous(breaks = seq(min(effective_minimum_wage_data$year), max(effective_minimum_wage_data$year), by = 4)) + 
-  labs(title = "State Effective Minimum Wage by Year (Adjusted for 2020 $)",
+  labs(title = "State Effective Minimum Wage by Year (2020 USD)",
        subtitle = "For states with an adjusted effective minimum wage above the federal level",
        x = "Year",
        y = "Effective Minimum Wage (Adjusted to 2020 values)",
@@ -458,7 +463,7 @@ full_state_data |>
   facet_wrap(~decade) +
   theme_light() +
   labs(
-    title = "% Collective Bargaining vs Proportion of House Delegation That is Democratic",
+    title = "% CB vs Proportion of House Delegation That is Democratic",
     x = "Percent of Workers Covered by Collective Bargaining",
     y = "Proportion of House Delegation that is Democratic",
     color = "Region"
@@ -478,7 +483,7 @@ full_state_data |>
   facet_wrap(~decade) +
   theme_light() +
   labs(
-    title = "% Collective Bargaining vs Proportion of House Delegation That is Democratic",
+    title = "% CB vs Proportion of House Delegation That is Democratic",
     subtitle = "Regressed by Region",
     x = "Percent of Workers Covered by Collective Bargaining",
     y = "Proportion of House Delegation that is Democratic",
@@ -584,6 +589,28 @@ ggplot(CB_party_regression, aes(x = Decade, y = Estimate, fill = Region)) +
 @fig-estimates plots the `Estimate` values calculated in the linear regressions.
 The regression analysis shows that the south and north central regions in the United States are the main regions that have seen union membership rates and political leanings show increased correlation. The south and north central regions have the greatest increase in their estimate values from the 1980s to the 2010s among the four regions.
 
+```{r fig-qqplot1980s}
+#| echo: false
+#| fig-cap: QQ Plot 1980s
+
+state_data_1980 <- full_state_data |> 
+  filter(year >= 1984 & year < 1990)
+regression_1980s <- lm(party_state_average~percent_collective_bargain, data = state_data_1980)
+qqnorm(regression_1980s$resi)
+qqline(regression_1980s$resi)
+```
+
+```{r fig-qqplot2010s}
+#| echo: false
+#| fig-cap: QQ Plot 2010s
+
+state_data_2010 <- full_state_data |> 
+  filter(year >= 2010 & year < 2020)
+regression_2010s <- lm(party_state_average~percent_collective_bargain, data = state_data_2010)
+qqnorm(regression_2010s$resi)
+qqline(regression_2010s$resi)
+```
+The QQ plot in @fig-qqplot1980s from the 1980s shows a very bimodal distribution, while the QQ plot in @fig-qqplot2010s from the 2010s regression model shows a more normal, slightly light-tailed distribution.
 
 ## Comparing Wages between Union and Non Union Workers
 
