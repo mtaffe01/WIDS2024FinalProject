@@ -238,33 +238,25 @@ In order to integrate citations into the References section below, we add entrie
 
 # Data and Methods {#sec-data}
 
-The data being analyzed is from a collection of five data sets. The first two data sets, `union_wages` and `union_states` are gathered from Tidy Tuesday, although the original data comes from the Union Membership and Coverage Database at Georgia State University. The  tables relevant to this paper detailed union membership counts by state and year, as well as union and non union wages nationally. The third data set, `house`, is also from Tidy Tuesday, although the original data comes from the MIT Election Data and Science Lab. The data includes every person who ran for a seat in the House of Representatives, but we only selected the election winner. The fourth data set, `income_distribution`, is also from Tidy Tuesday, although the original data comes from the U.S. Census. The data tracks the mean and median income nationally in the United States. The fifth data set, `minimum_wage`, comes from the U.S. Department of Labor and tracks minimum wage at the state level and the federal minimum wage.
+The data being analyzed is from a collection of five data sets. The first two data sets, `union_wages` and `union_states` are gathered from Tidy Tuesday, although the original data comes from the Union Membership and Coverage Database at Georgia State University. The  tables relevant to this paper detail union membership counts by state and year, as well as union and non union wages nationally. The third data set, `house`, is also from Tidy Tuesday, although the original data comes from the MIT Election Data and Science Lab. The data includes every person who ran for a seat in the House of Representatives, but we only selected the election winner. The fourth data set, `income_distribution`, is also from Tidy Tuesday, although the original data comes from the U.S. Census. The data tracks the mean and median income nationally in the United States. The fifth data set, `minimum_wage`, comes from the U.S. Department of Labor and tracks minimum wage at the state level and the federal minimum wage.
 
-ADD SPECIFICS ABOUT CLEANING EACH OF THE DATA SETS, HOW PARTY STATE AVERAGE WAS MADE, ETC
+All of the data sets undergo basic cleaning so that the columns are correctly formatted, variable names are consistent, so there are no NA values, and relevant variables are selected. For the house election data, the table is manipulated so that only rows of candidates who won their election remain. A binary variable is created in which we code the outcome as 1 if the winner was a Democrat and code the outcome as 0 if the winner was a Republican. An additional variable is created to show the proportion of the House delegation that is democratic for every combination of years and states. For the union data, it is filtered to not include union sectors, such as construction unions, and instead look at all unions. For the income distribution data, race is filtered out because it is outside of the scope of this study.
 
-The five data sets are combined into two data sets: one that stores data at the state level and another that stores data at the national level. `full_state_data` joins the `union_states`, `house`, and `minimum_wage` data sets. There are `8730` observations and each row represents a year and a state. `full_ntl_data` joins the `union_wages` and `income_distribution` data sets. There are `36` observations and each row represents a distinct year. Variables regarding union employment are not provided at the national level, only at the state level, so they were summarized and added to the national data set. 
+The five data sets are combined into two data sets: one that stores data at the state level and another that stores data at the national level. `full_state_data` joins the `union_states`, `house`, and `minimum_wage` data sets. There are `8730` observations and each row represents a year and a state. `full_ntl_data` joins the `union_wages` and `income_distribution` data sets. There are `36` observations and each row represents a distinct year. Variables regarding union employment are not provided at the national level, only at the state level, so they were summarized and added to the national data set. Economic variables in the national data are not originally adjusted to 2020 values, so we calculate the rate from the state data that contains adjusted and non-adjusted values for federal minimum wage, and then apply that rate to the national data. This allows all of the economic data to be standardized and account for inflation. Among the original five data sets, there is data recorded from 1967 to 2022. Not all of the data sets cover that time frame, so once joined into two data sets, the data was filtered to only include the years 1984 to 2019. 
 
-Among the original five data sets, there is data recorded from 1967 to 2022. Not all of the data sets cover that time frame, so once joined into two data sets, the data was filtered to only include the years 1984 to 2019. 
-
-
+With two cleaned data sets, we conduct our exploratory data analysis using R version `r paste(R.version$major, R.version$minor, sep = ".")` [@rcoreteam23]. We rely on several elements of the `tidyverse` [@wickhamtidyverse].
 
 
 
 
 
-This section describes the data we analyze. We describe the source of the data, and its primary features. We cite our data. We describe the methods we use to answer our question and to test our hypotheses.
 
-If our data were `cars`, loaded in a chunk above, we note that our data have `r nrow(cars)` observations. Our unit of analysis is the cars; each row represents a different car that was measured.
+We cite our data. We describe the methods we use to answer our question and to test our hypotheses.
 
-We refer to concepts and label them appropriately. We state our outcome and how it is measured: "Our outcome is stopping distance measured in feet." We state our key predictor and how it is measured: "Our key predictor is the car's speed, measured in miles per hour."
+"Our outcome is stopping distance measured in feet." We state our key predictor and how it is measured: "Our key predictor is the car's speed, measured in miles per hour."
 
 We almost never refer to specific variable, object, function, or data frame names (such as `var_x`, `ourdata`, `this_useful_func`, or `df`). These particular names are almost never of interest or use to the reader.
 
-We explain important decisions and codings in this section. "We collect our data from source X. We code the outcome as 1 if the registrant turned out in the 2022 election, 0 if they did not." A table can serve as an efficient way to detail several such decisions.
-
-Where there are less-critical details that we implement to improve our analysis or presentation, we do not explain them in the paper. Our paper does not say, for example, "we reorder the levels of the factor variable from alphabetical 'high, low, medium' to the sensible 'low, medium, high.'" Of course, we implement that reordering, but it should not appear in our paper.
-
-We cite the software we use. For example, we conduct our analysis using R version `r paste(R.version$major, R.version$minor, sep = ".")` [@rcoreteam23]. We rely on several elements of the `tidyverse` [@wickhamtidyverse]. Of course, we do not cite software that we do not use.
 
 ## Union Data
 
@@ -628,6 +620,15 @@ tab |>
 ```
 
 # Discussion
+
+From our data analysis it can be inferred that collective bargaining agreements have become a very political concept. The charts in our exploratory data analysis and regression models show this. This partially supports our hypothesis. While the correlation is a newer phenomenon, the relationship appears to be strong today. The relationship between unions and wages/income in the United States is much harder to draw inferences. While our t-tests and some charts show that unions can help workers earn more, other graphs show that unions have a negative effect on incomes. Our second hypothesis thus remains without strong support.
+
+
+
+
+-   Union wage data at the state level
+-   Data past 2019
+-   A greater amount and complexity of models
 
 We remind the reader what this paper was about, why it was important, and what we found. We reflect on limitations of the data or methods. If we have specific advice for someone picking up where we leave off, we provide that guidance. We avoid making trite statements like "more research should be done".
 
