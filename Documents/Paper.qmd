@@ -210,9 +210,9 @@ Unions play a crucial role in negotiating wages and benefits for workers through
 
 In this paper, we use three research questions to guide our analysis:
 
-1.    Is there any relationship between collective bargaining rates among workers to House delegation makeup?
-2.    Is there any relationship between collective bargaining rates among workers and wages?
-3.    Is there any relationship between collective bargaining rates among workers and wages?
+1.  Is there any relationship between collective bargaining rates among workers to house delegation makeup?
+2.  Is there any relationship between collective bargaining rates among workers and wages?
+3.  Do collective bargaining rates effect wealth inequality?
 
 Guided by our research questions, we have two hypothesis: 
 
@@ -266,47 +266,11 @@ Where there are less-critical details that we implement to improve our analysis 
 
 We cite the software we use. For example, we conduct our analysis using R version `r paste(R.version$major, R.version$minor, sep = ".")` [@rcoreteam23]. We rely on several elements of the `tidyverse` [@wickhamtidyverse]. Of course, we do not cite software that we do not use.
 
-## Wage Data
+## Union Data
 
-```{r fig-cb}
+```{r fig-uniondata}
 #| echo: false
-#| fig-cap: Collective Bargaining
-
-per_union_wage_data <- full_state_data |> # This object will be used to create the graph and also in the data subset
-  mutate(
-    map_color = case_when(
-      state_abbreviation == "CA" ~ "CA", # States we would like to highlight. first "" is the state abb, second "" is what will appear in legend
-      state_abbreviation == "AK" ~ "AK",
-      state_abbreviation == "OK" ~ "OK",
-      state_abbreviation == "FL" ~ "FL",
-      state_abbreviation == "HI" ~ "HI",
-      .default = NA
-    )
-  ) 
-States_by_union <- per_union_wage_data |> # use created table here
-  ggplot(aes(x = year)) +
-  geom_line(aes(y = percent_union, group = state_abbreviation),
-            color = "grey75", alpha =0.6) + # using group means the groupings wont appear in legend
-  geom_line(data = subset(per_union_wage_data, # use created object here
-                          !is.na(map_color)), #subset used to keep out non highlighted states
-            aes(y = percent_union, color = map_color),
-            linewidth = .75) +
-  geom_line(data = subset(full_ntl_data, year >= 1984),
-            aes(y = percent_union), color = "orange", linewidth = 1.5) +
-  annotate("text", x=1988, y=.15, label= "Federal Avg", color = "orange", size = 5) +
-  theme_minimal() +
-  scale_x_continuous(breaks = seq(min(per_union_wage_data$year), max(per_union_wage_data$year), by = 4)) + 
-  labs(title = "States by % of Labor Market Covered by Union",
-       x = "Year",
-       y = "% of Labor Market In Union",
-       color = "Selected States")
-States_by_union
-ggsave("../Documents/Graph_Images/States_by_union.png", width=7.29, height=5.41)
-```
-
-```{r fig-a}
-#| echo: false
-#| fig-cap: a
+#| fig-cap: Union Data
 
 per_collective_wage_data <- full_state_data |> # This object will be used to create the graph and also in the data subset
   mutate(
@@ -338,9 +302,10 @@ per_collective_wage_data |> # use created table here
        color = "Selected States")
 ```
 
-```{r fig-wages}
+## Income Data
+```{r fig-incomedata}
 #| echo: false
-#| fig-cap: Wages 
+#| fig-cap: Income Data
 
 full_ntl_data |> 
   filter(year >= 1984) |> 
@@ -354,13 +319,13 @@ full_ntl_data |>
   labs(
     title = "Mean and Median Income in the United States Between 1984 and 2019",
     x = "Year",
-    y = "Income in USD (Adjusted to 2020 values)"
+    y = "Income in USD"
   )
 ```
 
-```{r fig-b}
+```{r fig-incomedataadj}
 #| echo: false
-#| fig-cap: b
+#| fig-cap: Income Data (adjusted)
 
 full_ntl_data |> 
   filter(year >= 1984) |> 
@@ -378,43 +343,9 @@ full_ntl_data |>
   )
 ```
 
-```{r fig-d}
+```{r fig-wagedata}
 #| echo: false
-#| fig-cap: d
-
-state_minimum_wage_data <- full_state_data |> # This object will be used to create the graph and also in the data subset
-  mutate(
-    map_color = case_when(
-      state_abbreviation == "CA" ~ "CA", # States we would like to highlight. first "" is the state abb, second "" is what will appear in legend
-      state_abbreviation == "AK" ~ "AK",
-      state_abbreviation == "OK" ~ "OK",
-      state_abbreviation == "FL" ~ "FL",
-      .default = NA
-    )
-  ) 
-
-state_minimum_wage_data |> # use created table here
-  ggplot(aes(x = year)) +
-  geom_line(aes(y = state_min_wage_2020_adj, group = state_abbreviation),
-            color = "grey75", alpha =0.6) + # using group means the groupings wont appear in legend
-  geom_line(data = subset(state_minimum_wage_data, # use created object here
-                          !is.na(map_color)), #subset used to keep out non highlighted states
-            aes(y = state_min_wage_2020_adj, color = map_color),
-            linewidth = .75) +
-  geom_line(aes(y = fed_min_wage_2020_adj), color = "orange", linewidth = 1.5) + # federal minimum wage
-  annotate("text", x=1990, y=6, label= "Federal Avg", color = "orange", size = 5) +
-  theme_minimal() +
-  scale_x_continuous(breaks = seq(min(state_minimum_wage_data$year), max(state_minimum_wage_data$year), by = 4)) + 
-  labs(title = "State Minimum Wage by Year (Adjusted for 2020 $)",
-       subtitle = "For states with an adjusted effective minimum wage above the federal level",
-       x = "Year",
-       y = "Minimum Wage (Adjusted to 2020 values)",
-       color = "Selected States")
-```
-
-```{r fig-e}
-#| echo: false
-#| fig-cap: e
+#| fig-cap: Wage Data
 
 effective_minimum_wage_data <- full_state_data |> 
   filter(effective_min_wage_2020_adj != fed_min_wage_2020_adj) |> 
@@ -448,9 +379,9 @@ effective_minimum_wage_data |>
 
 ## House of Representatives Data
 
-```{r fig-c}
+```{r fig-housedata}
 #| echo: false
-#| fig-cap: c
+#| fig-cap: House Data
 
 map_data <- full_state_data |> 
   select(c("year", "state", "party_state_average")) |> 
@@ -476,9 +407,9 @@ plot_usmap(data = map_data, values = "party_state_average", color = "black") +
 
 ## Collective Bargaining and Wage Data
 
-```{r fig-w}
+```{r fig-unionwagedata}
 #| echo: false
-#| fig-cap: w
+#| fig-cap: Union Wage Data
 
 full_ntl_data |> 
   ggplot(aes(x = year)) +
@@ -495,9 +426,9 @@ full_ntl_data |>
   )
 ```
 
-```{r fig-x}
+```{r fig-collectivebargain}
 #| echo: false
-#| fig-cap: x
+#| fig-cap: Collective Bargain Data
 
 full_ntl_data |> 
   ggplot(aes(x = percent_collective_bargain)) +
@@ -515,9 +446,9 @@ full_ntl_data |>
 
 ## Collective Bargaining and House of Representatives Data
 
-```{r fig-y}
+```{r fig-collectivebargaindecade}
 #| echo: false
-#| fig-cap: y
+#| fig-cap: Collective Bargain Data by Decade
 
 full_state_data |> 
   filter(year %% 4==0) |>
@@ -534,9 +465,9 @@ full_state_data |>
   )
 ```
 
-```{r fig-z}
+```{r fig-collectivebargainregion}
 #| echo: false
-#| fig-cap: z
+#| fig-cap: Collective Bargain Region by Decade and Region
 
 full_state_data |> 
   filter(year %% 4==0) |>
@@ -677,23 +608,24 @@ t_lower_ci_2010s <- t_out_2010s$conf.int[1] |> round(2)
 t_upper_ci_2010s <- t_out_2010s$conf.int[2] |> round(2)
 ```
 
-The difference between union wages and non union wages means in the 1980s is `r t_out_1980s$estimate[2] - t_out_1980s$estimate[1]`, with a 95% confidence interval that covers $(`r -t_upper_ci_1980s`, `r -t_lower_ci_1980s`)$. The difference between union wages and non union wages means in the 2010s is `r t_out_2010s$estimate[2] - t_out_2010s$estimate[1]`, with a 95% confidence interval that covers $(`r -t_upper_ci_2010s`, `r -t_lower_ci_2010s`)$. The 95% confidence interval for the 1980s has a smaller range than the 95% confidence interval for the 2010s, demonstrating an increasing wage differential over time.
+The difference between union wages and non union wages means in the 1980s is `r t_out_1980s$estimate[2] - t_out_1980s$estimate[1]`, with a 95% confidence interval that covers $(`r -t_upper_ci_1980s`, `r -t_lower_ci_1980s`)$. The difference between union wages and non union wages means in the 2010s is `r t_out_2010s$estimate[2] - t_out_2010s$estimate[1]`, with a 95% confidence interval that covers $(`r -t_upper_ci_2010s`, `r -t_lower_ci_2010s`)$. The 95% confidence interval for the 1980s has a smaller range than the 95% confidence interval for the 2010s.
 
-```{r tbl-ttesttable2}
+
+```{r}
 #| echo: FALSE
 #| warning: FALSE
 #| tbl-cap: Wages by Union and Non Union Workers
 
-tab <- rbind(
-  model_parameters(t_out_1980s),
-  model_parameters(t_out_2010s)
-)
+tab <- tibble(
+  "metric" = c("t", "df", "p-value", "95%-CI-LB", "95%-CI-UB", "Mean_of_X", 
+               "Mean_of_Y"),
+  "t_out_1980s" = c(t_out_1980s$statistic, t_out_1980s$parameter, t_out_1980s$p.value, t_out_1980s$conf.int, t_out_1980s$estimate),
+  "t_out_2010s" = c(t_out_2010s$statistic, t_out_2010s$parameter, t_out_2010s$p.value, t_out_2010s$conf.int, t_out_2010s$estimate)) 
 
 tab |> 
   print_md(
     footer = "")
 ```
-
 
 # Discussion
 
