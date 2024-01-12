@@ -1,0 +1,150 @@
+---
+title: "WIDS 2024 Final Presentation"
+author: "Michael Taffe, Melanie Klein, Ramiro Arevalo"
+format: 
+  revealjs:
+    theme: simple
+    monofont: "Courier New"
+    monofontoptions: "size=10%"
+editor: visual
+---
+
+## Project Abstract
+
+For our project, our goal was to examine the relationships between collective bargaining agreements, U.S. house election results, and incomes/wages of Americans. The motivation for this project is the rise in wealth inequality and populism in America and the recent surge in union activity. In our project, we found that all three metrics are related. Using regression testing we show that for unions and political leanings, this relationship has surged and deepened in the last forty years.
+
+## Literature Review
+
+## About the Data pt. 1 {.smaller}
+
+-   **Union data**
+    -   Gathered from Tidy Tuesday, although the original data comes from the Union Membership and Coverage Database at Georgia state university.
+    -   For our project, the relevant tables include one that details union membership counts by state by year and another that tracks union and non union wages by year.
+-   **House election data**
+    -   Also gathered from Tidy Tuesday's repository, this data originally came from the MIT Election Data and Science Lab.
+    -   The variables we selected from the data set were year, state, district, and election winner
+
+## About the Data pt. 2 {.smaller}
+
+-   **Wage**
+    -   Our wage data was obtained through the U.S. Department of Labor and Tidy Tuesday (originally from U.S. census data).
+    -   This data tracked the mean and median income nationally in the United States.
+    -   Another table tracked minimum wage at the state level.
+
+## Data manipulation pt. 1 {.smaller}
+
+-   All of our data had undergone basic cleaning before we downloaded it so all of the columns were correctly formatted and there was almost 0 NA values.
+-   each data set was pared down so that only the variables relevant to our project was completed.
+-   for our house election data, the table was manipulated so that only rows of candidates who won their election remained.
+    -   other minor changes included renaming variables and recoding a few outlier observations in the `party` variable.
+-   For the union data, we filtered the datasets down to not include union sectors (ex. construction-unions) and added columns to adjust for inflation.
+-   For our wage data, we filtered out race, as this was outside of the scope of our study.
+
+## Data manipulation pt. 2
+
+-   Our last data manipulation was combining all of our tables into two data sets: one that stores data at a national level, and another that stores data at a state level.
+-   some of the variables were only provided at the state level so they were summarized and added to the national data set.
+
+## EDA pt. 1: Overview
+
+-   EDA was split into five sections: wage data, union data, house data, wage data's associations with union data, and union data's association with house data. We did not have the relevant wage data to compare wages and house elections.
+
+## EDA pt. 2: Wage Data {.smaller}
+
+::: columns
+::: {.column width="60%"}
+-   Incomes, when adjusted for inflation, have been decreasing since 1984. Surprisingly, our data shows income inequality has remained stagnant over the last forty years.
+-   Minimum wages, which had been stagnant since 2009, began to grow again in 2016, although the federal rate has remained stagnant.
+:::
+
+::: {.column width="40%"}
+![Plot 1](./Graph_Images/Income_by_year_adj.png)
+![Plot 2](./Graph_Images/Eff_wage_by_state.png)
+:::
+:::
+
+## EDA pt. 3: Union Data {.smaller}
+
+::: columns
+::: {.column width="60%"}
+-   Union and collective bargaining rates have collapsed over the last 40 years, although may just beginning to see a come back in the last two.
+-   Southern states have much less union activity than northern and western states.
+:::
+
+::: {.column width="40%"}
+![Plot 3](./Graph_Images/States_by_CB.png)
+:::
+:::
+
+## EDA pt. 4: House Data {.smaller}
+
+::: columns
+::: {.column width="60%"}
+-   The country has generally grown more republican in the last 40 years, although data in the last 10 years show the pendulum might now be swinging the other way.
+    -   Northern-midwest states have had the biggest shift to the right. New England is the only region that has seen a shift left.
+:::
+
+::: {.column width="40%"}
+![Plot 4](./Graph_Images/House_by_year.png)
+:::
+:::
+
+## EDA pt. 5: Wage Data's Interactions With Union Data {.smaller}
+
+::: columns
+::: {.column width="60%"}
+-   From the graph, it appears that a reduction in the amount of employees covered by a union leads to an increase in wages. However, for individual workers, being part of a union remains a way to increase wages.
+-   We do not have data to compare wages and union rates by state, which would likely tell a different story.
+:::
+
+::: {.column width="40%"}
+![Plot 5](./Graph_Images/Union_wage_by_decade.png)
+:::
+:::
+
+## EDA pt. 6: House Election Data's Interactions With Union Data {.smaller}
+
+::: columns
+::: {.column width="60%"}
+-   Unions have become a very political topic in the last 40 years.
+-   This trend appears to be driven by the north central and south regions.
+:::
+
+::: {.column width="40%"}
+![Plot 6](./Graph_Images/CB_by_decade1.png){width=80%}
+![Plot 7](./Graph_Images/CB_by_decade2.png){width=80%}
+
+:::
+:::
+
+## Models {.smaller}
+::: columns
+::: {.column width="60%"}
+-   Our regression analysis shows that the south and north central regions in the united states are the main regions that have seen union membership rates and political leanings show increased correlation.
+- T-test between union and non union wages
+  - 1980s: t = 22.846, df = 9.4096, p-value = 1.462e-09
+    - mean of x = 26.306;  mean of y = 20.375
+    - 95% CI: (5.347, 6.514)
+  - 2010s: t = 22.846, df = 9.4096, p-value = 1.462e-09
+    - mean of x = 3.786;  mean of y = 25.664
+    - 95% CI: (3.786, 5.952)
+:::
+
+::: {.column width="40%"}
+![Plot 8](./Graph_Images/Regression_plot.png)
+
+:::
+:::
+
+## Conclusion {.smaller}
+
+From our data analysis it can be infered that collective bargaining agreements have become a very political concept. The charts in our exploratory data analysis and regression models show this. The relationship between unions and wages/income in the United States is much harder to draw inferences. While our t-tests and some charts show that unions can help workers earn more, other graphs show that unions have a negative effect on incomes.
+
+## Where we would take our project in the future {.smaller}
+- Wage data at the state level
+- Data past 2019
+- A greater amount and complexity of models
+
+# Thank You
+
+## Bibliography {.smaller}

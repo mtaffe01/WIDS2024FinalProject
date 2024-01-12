@@ -317,7 +317,7 @@ per_union_wage_data <- full_state_data |> # This object will be used to create t
       .default = NA
     )
   ) 
-per_union_wage_data |> # use created table here
+States_by_union <- per_union_wage_data |> # use created table here
   ggplot(aes(x = year)) +
   geom_line(aes(y = percent_union, group = state_abbreviation),
             color = "grey75", alpha =0.6) + # using group means the groupings wont appear in legend
@@ -334,8 +334,9 @@ per_union_wage_data |> # use created table here
        x = "Year",
        y = "% of Labor Market In Union",
        color = "Selected States")
-
-rm(per_union_wage_data)
+States_by_union
+ggsave("../Documents/Graph_Images/States_by_union.png", width=7.29, height=5.41)
+rm(per_union_wage_data, States_by_union)
 ```
 
 Our first graph shows what is commonly known about unions in the United States: Union membership has been on the decline since at least the 1980s. Unfortunately our data does not extend to the last four years where some reports indicate union membership is on the rise. Early on, we can see that southern and more Republican leaning states have lower union rates than more Democrat and northern / western states. There is a very small bump in membership in 2008, which we hypothesize happened in relation to the 2008 financial crisis.
@@ -351,7 +352,7 @@ per_collective_wage_data <- full_state_data |> # This object will be used to cre
       .default = NA
     )
   ) 
-per_collective_wage_data |> # use created table here
+States_by_CB <- per_collective_wage_data |> # use created table here
   ggplot(aes(x = year)) +
   geom_line(aes(y = percent_collective_bargain, group = state_abbreviation),
             color = "grey75", alpha =0.6) + # using group means the groupings wont appear in legend
@@ -368,8 +369,9 @@ per_collective_wage_data |> # use created table here
        x = "Year",
        y = "% of Labor Market in a Collective Bargaining Agreement",
        color = "Selected States")
-
-rm(per_collective_wage_data)
+States_by_CB
+ggsave("../Documents/Graph_Images/States_by_CB.png", width=7.29, height=5.41)
+rm(per_collective_wage_data, States_by_CB)
 ```
 
 This graph is almost the same as the previous plot, although the rates are slightly higher because this graph includes all collective bargaining agreements.
@@ -377,7 +379,7 @@ This graph is almost the same as the previous plot, although the rates are sligh
 ### 2.3.2 Wages
 
 ```{r}
-full_ntl_data |> 
+Income_by_year <- full_ntl_data |> 
   filter(year >= 1984) |> 
   ggplot(aes(x = year)) +
   geom_line(aes(y = mean_income), color = "red") +
@@ -391,10 +393,13 @@ full_ntl_data |>
     x = "Year",
     y = "Income in USD (Adjusted to 2020 values)"
   )
+Income_by_year
+ggsave("../Documents/Graph_Images/Income_by_year.png", width=7.29, height=5.41)
+rm(Income_by_year)
 ```
 
 ```{r}
-full_ntl_data |> 
+Income_by_year_adj <- full_ntl_data |> 
   filter(year >= 1984) |> 
   ggplot(aes(x = year)) +
   geom_line(aes(y = mean_income_2020_adj), color = "red") +
@@ -404,10 +409,14 @@ full_ntl_data |>
   scale_x_continuous(breaks = seq(min(full_ntl_data$year), max(full_ntl_data$year), by = 4)) + 
   theme_minimal() +
   labs(
-    title = "Mean and Median Income in the United States Between 1984 and 2019",
+    title = "Mean and Median Income in the United States Between 1984 and 2019 (2020 USD)",
     x = "Year",
     y = "Income in USD (Adjusted to 2020 values)"
   )
+
+Income_by_year_adj
+ggsave("../Documents/Graph_Images/Income_by_year_adj.png", width=7.29, height=5.41)
+rm(Income_by_year_adj)
 ```
 
 
@@ -424,7 +433,7 @@ state_minimum_wage_data <- full_state_data |> # This object will be used to crea
       .default = NA
     )
   ) 
-state_minimum_wage_data |> # use created table here
+Min_wage_by_state <- state_minimum_wage_data |> # use created table here
   ggplot(aes(x = year)) +
   geom_line(aes(y = state_min_wage_2020_adj, group = state_abbreviation),
             color = "grey75", alpha =0.6) + # using group means the groupings wont appear in legend
@@ -442,6 +451,9 @@ state_minimum_wage_data |> # use created table here
        y = "Minimum Wage (Adjusted to 2020 values)",
        color = "Selected States")
 
+Min_wage_by_state
+ggsave("../Documents/Graph_Images/Min_wage_by_state.png", width=7.29, height=5.41)
+rm(Min_wage_by_state)
 rm(state_minimum_wage_data) # remove object to make graph
 ```
 
@@ -459,7 +471,7 @@ effective_minimum_wage_data <- full_state_data |>
       .default = NA
     )
   ) 
-effective_minimum_wage_data |> 
+Eff_wage_by_state <- effective_minimum_wage_data |> 
   ggplot(aes(x = year)) +
   geom_line(aes(y = effective_min_wage_2020_adj, group = state_abbreviation),
             color = "grey75", alpha =0.6) +
@@ -476,6 +488,9 @@ effective_minimum_wage_data |>
        y = "Effective Minimum Wage (Adjusted to 2020 values)",
        color = "Selected States")
 
+Eff_wage_by_state
+ggsave("../Documents/Graph_Images/Eff_wage_by_state.png", width=7.29, height=5.41)
+rm(Eff_wage_by_state)
 rm(effective_minimum_wage_data)
 ```
 
@@ -488,16 +503,26 @@ map_data <- full_state_data |>
   select(c("year", "state", "party_state_average")) |> 
   distinct(year, state, .keep_all = TRUE) |> 
   filter(year %% 4==0) |> 
-  filter(!is.na(party_state_average))
+  filter(!is.na(party_state_average)) |> 
+  full_join(
+    tibble(
+      "year" = seq(from=1984, to=2016, by=4),
+      "state" = rep("District of Columbia", 9),
+      "party_state_average" = rep(.5, 9)),
+    by = c("year", "state", "party_state_average")
+    )
 
-plot_usmap(data = map_data, values = "party_state_average", color = "black") +
+House_by_year <- plot_usmap(data = map_data, values = "party_state_average", color = "black") +
   facet_wrap(~year, nrow = 4, ncol= 3) +
   theme(legend.position = "bottom") +
   scale_fill_gradient(low = "red", high = "blue", name = "Proportion") +
   labs(
     title = "Proportion of House Delegation that is Democratic"
   )
-rm(map_data)
+
+House_by_year
+ggsave("../Documents/Graph_Images/House_by_year.png", width=7.29, height=5.41)
+rm(map_data, House_by_year)
 ```
 
 We can see that, especially in the northern-midwest states, that the country has grown to be more republican in the last 40 years. However, in the last 10 years this has begun to shift again. During this whole time, it appears that New England has become more Democrat.
@@ -505,7 +530,7 @@ We can see that, especially in the northern-midwest states, that the country has
 ### 2.3.4 Collective Bargaining and Wages
 
 ```{r}
-full_ntl_data |> 
+Union_wage_by_year <- full_ntl_data |> 
   ggplot(aes(x = year)) +
   geom_line(aes(y = union_wage_2020_adj), color = "blue") +
   annotate("text", x=1993, y=28, label= "Union Wages", color = "blue", size = 5) +
@@ -518,12 +543,16 @@ full_ntl_data |>
     x = "Year",
     y = "Wages (Adjusted to 2020 values)"
   )
+
+Union_wage_by_year
+ggsave("../Documents/Graph_Images/Union_wage_by_year.png", width=7.29, height=5.41)
+rm(Union_wage_by_year)
 ```
 
 From our income graphs, this graph is rather unintuitive, as we would expect adjusted wages to be decreasing in this time. There are a number of potential causes for this. First, Americans work less hours today than they did in 1980. Second, and more likely, is that the income variables we used includes those who are not working. As the U.S. experiences a graying of society, this could be driving down mean incomes.
 
 ```{r}
-full_ntl_data |> 
+Union_wage_by_decade <- full_ntl_data |> 
   ggplot(aes(x = percent_collective_bargain)) +
   geom_point(aes(y = nonunion_wage_2020_adj), color = "blue") +
   geom_jitter(aes(y = union_wage_2020_adj), color = "red") +
@@ -534,8 +563,11 @@ full_ntl_data |>
     subtitle = "Red represents union wages and blue represents non-union wages",
     x = "Percent of Workers Under Collective Bargaining Agreement",
     y = "Wages (Adjusted to 2020 values)"
-    
   )
+
+Union_wage_by_decade
+ggsave("../Documents/Graph_Images/Union_wage_by_decade.png", width=7.29, height=5.41)
+rm(Union_wage_by_decade)
 ```
 
 This graph is incredibly interesting. First, a quick view of this graph shows the exact opposite of our hypothesis. Looking at each decade we can see collective bargaining rates decreasing and wage increasing. Then, in each decade that relationship continues. Still, we can see that in every decade, a collective bargaining agreement will lead to an increase in wages for a worker over non-collective-bargaining-jobs.
@@ -547,7 +579,7 @@ This graph demonstrates how political collective bargaining has become over the 
 
 ```{r}
 #| message: FALSE
-full_state_data |> 
+CB_by_decade1 <- full_state_data |> 
   filter(year %% 4==0) |>
   ggplot(aes(x = percent_collective_bargain, y = party_state_average)) +
   geom_jitter(aes(color = regions), alpha = 0.5, width = 0.1, height = 0.1) +
@@ -555,17 +587,21 @@ full_state_data |>
   facet_wrap(~decade) +
   theme_light() +
   labs(
-    title = "Percent Collective Bargaining vs Proportion of House Delegation That is Democratic",
+    title = "% Collective Bargaining vs Proportion of House Delegation That is Democratic",
     x = "Percent of Workers Covered by Collective Bargaining",
     y = "Proportion of House Delegation that is Democratic",
     color = "Region"
   )
+
+CB_by_decade1
+ggsave("../Documents/Graph_Images/CB_by_decade1.png", width=7.29, height=5.41)
+rm(CB_by_decade1)
 ```
 
 
 ```{r}
 #| message: FALSE
-full_state_data |> 
+CB_by_decade2 <- full_state_data |> 
   filter(year %% 4==0) |>
   ggplot(aes(x = percent_collective_bargain, y = party_state_average)) +
   geom_jitter(aes(color = regions), alpha = 0.15, width = 0.1, height = 0.1) +
@@ -573,12 +609,16 @@ full_state_data |>
   facet_wrap(~decade) +
   theme_light() +
   labs(
-    title = "Percent Collective Bargaining vs Proportion of House Delegation That is Democratic",
+    title = "% Collective Bargaining vs Proportion of House Delegation That is Democratic",
     subtitle = "Regressed by Region",
     x = "Percent of Workers Covered by Collective Bargaining",
     y = "Proportion of House Delegation that is Democratic",
     color = "Region"
   )
+
+CB_by_decade2
+ggsave("../Documents/Graph_Images/CB_by_decade2.png", width=7.29, height=5.41)
+rm(CB_by_decade2)
 ```
 These two graphs show very interesting results. First, we can see how unions have become politicized in the last 40 years. In the 1980s, there was almost no correlation between the amount of workers in a collective bargaining agreement and what the house delegation looked like in that state. By the 2010s, this had changed. From the second graph, we can see that the North Central and South regions are the main drivers behind this, seen in the steepening of the regression slope.
 
@@ -596,6 +636,7 @@ t.test(full_ntl_data_1980s$union_wage_2020_adj, full_ntl_data_1980s$nonunion_wag
 full_ntl_data_2010s <- full_ntl_data |>
   filter(decade == "2010s")
 t.test(full_ntl_data_2010s$union_wage_2020_adj, full_ntl_data_2010s$nonunion_wage_2020_adj)
+rm(full_ntl_data_1980s, full_ntl_data_2010s)
 ```
 
 
@@ -650,11 +691,13 @@ CB_party_regression <- full_join(CB_party_regression, CB_party_temp,
                                    by = join_by(Reggression_Run, Decade, Region, Estimate, `Std. Error`, `t value`, `Pr(>|t|)`)) |>
   filter(Reggression_Run == "percent_collective_bargain") |>
   rename(P_Value = "Pr(>|t|)")
+
+rm(CB_party_temp, x, regression_decade_region)
 ```
 
 Graph of regression estimate by decade and year
 ```{r}
-ggplot(CB_party_regression, aes(x = Decade, y = Estimate, fill = Region)) +
+Regression_plot <- ggplot(CB_party_regression, aes(x = Decade, y = Estimate, fill = Region)) +
   geom_bar(stat = "identity", position = "dodge") +
   geom_text(aes(label = sprintf("P=%.3f", P_Value)),
              position = position_dodge(width = 0.9),
@@ -663,6 +706,10 @@ ggplot(CB_party_regression, aes(x = Decade, y = Estimate, fill = Region)) +
   theme_minimal() +
   labs(title = "Linear Regression Estimate by Decade",
        subtitle = "Model of Percent Collective Bargaining vs Proportion of House Delegation That is Democratic")
+
+Regression_plot
+ggsave("../Documents/Graph_Images/Regression_plot.png", width=7.29, height=5.41)
+rm(Regression_plot, CB_party_regression, decade_region)
 ```
 
 ## Conclusion
