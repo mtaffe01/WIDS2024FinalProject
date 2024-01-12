@@ -15,7 +15,7 @@ date: 2024-01-12
 date-format: iso
 documentclass: article
 editor: source
-abstract: "This is our informative abstract of fewer than 200 words. It describes what we investigate, how we investigate it, and what we find."
+abstract: "For our project, our goal is to examine the relationships between collective bargaining agreements, U.S. house election results, and incomes/wages of Americans. The motivation for this project is the rise in wealth inequality and populism in America and the recent surge in union activity. In our project, we find that all three metrics are related. Using regression testing we show that for unions and political leanings, this relationship has surged and deepened in the last four decades from 1984 to 2019"
 #bibliography: main.bib
 ---
 
@@ -52,9 +52,9 @@ minimum_wage <- read_csv("../Data/minimum_wage_data.csv",show_col_types = FALSE)
 
 # Introduction
 
-Unions play a crucial role in negotiating wages and benefits for workers through collective bargaining agreements. The political landscape, particularly the House of Representatives, holds significant legislative authority in influencing workers' rights and labor policies. We examine the relationship between union employment, the composition of the House delegation, and economic variables such as income, minimum wages, and union wages. 
+Unions play a crucial role in negotiating wages and benefits for workers through collective bargaining agreements. The political landscape, particularly the House of Representatives, holds significant legislative authority in influencing workers' rights and labor policies. We examine the relationship between unions and collective bargaining agreements, U.S. House of Representatives election results, and economic variables including the incomes and wages of Americans.
 
-In our research, we seek to understand how union membership and economic factors influence the level of representation by the Democratic Party in the House of Representatives. We hypothesize that there will be an association between the Democratic Party and the employment of union and collective bargaining employees.
+In our research, we seek to understand how union membership and economic factors influence the level of representation by the Democratic Party in the House of Representatives. We hypothesize that there will be an association between the proportion of the House delegation that is Democratic and the employment of union and collective bargaining workers.
 
 
 In this section, we introduce the reader to the phenomenon we investigate. We describe the way in which our analysis contributes to an important intellectual debate, or how it answers a pressing political or social question. We introduce our research question, hypotheses, data, and results. We signpost for the reader what's coming in the rest of the paper.
