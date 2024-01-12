@@ -1,5 +1,6 @@
 ---
 title: "WIDS 2024 Final Presentation"
+subtitle: "Comparing Collective Bargaining, Income, and House Election data"
 author: "Michael Taffe, Melanie Klein, Ramiro Arevalo"
 format: 
   revealjs:
@@ -14,6 +15,22 @@ editor: visual
 For our project, our goal is to examine the relationships between collective bargaining agreements, U.S. house election results, and incomes/wages of Americans. The motivation for this project is the rise in wealth inequality and populism in America and the recent surge in union activity. In our project, we find that all three metrics are related. Using regression testing we show that for unions and political leanings, this relationship has surged and deepened in the last forty years.
 
 ## Literature Review
+
+## Project Question
+
+The research questions we used to guide our analysis:
+
+1.  Is there any relationship between collective bargaining rates among workers to house delegation makeup?
+2.  Is there any relationship between collective bargaining rates among workers and wages
+3.  Is there any relationship between collective bargaining rates among workers and wages?
+
+## Hypotheses
+
+Guided by our questions we have two hypotheses:
+
+1.  There is a significant correlation between collective bargaining rates and higher amounts of Democrat representation.
+
+2.  Unions will lead to higher wages.
 
 ## About the Data pt. 1 {.smaller}
 
@@ -135,7 +152,7 @@ For our project, our goal is to examine the relationships between collective bar
 
 ## Conclusion {.smaller}
 
-From our data analysis it can be inferred that collective bargaining agreements have become a very political concept. The charts in our exploratory data analysis and regression models show this. The relationship between unions and wages/income in the United States is much harder to draw inferences. While our t-tests and some charts show that unions can help workers earn more, other graphs show that unions have a negative effect on incomes.
+From our data analysis it can be inferred that collective bargaining agreements have become a very political concept. The charts in our exploratory data analysis and regression models show this. This partially supports our hypothesis. While the correlation is a newer phenomenon, the relationship appears to be strong today. The relationship between unions and wages/income in the United States is much harder to draw inferences. While our t-tests and some charts show that unions can help workers earn more, other graphs show that unions have a negative effect on incomes. Our second hypothesis thus remains without strong support.
 
 ## Where we would take our project in the future {.smaller}
 
