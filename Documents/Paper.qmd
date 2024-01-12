@@ -1,9 +1,9 @@
 ---
-title: "Your Substantive Title Here"
+title: "Comparing Interactions Between Collective Bargaining Rates, Wages, and House of Representative Elections"
 author: 
+  - Ramiro Arevalo^[American University]
   - Melanie Klein^[American University]
   - Michael Taffe^[American University]
-  - Ramiro Arevalo^[American University]
 
 format: 
   pdf:
@@ -11,20 +11,17 @@ format:
     toc: false
     geometry: 
       - top=3cm
-date: 2023-09-27
+date: 2024-01-12
 date-format: iso
 documentclass: article
 editor: source
 abstract: "This is our informative abstract of fewer than 200 words. It describes what we investigate, how we investigate it, and what we find."
-bibliography: main.bib
+#bibliography: main.bib
 ---
 
 ```{r setup}
 #| echo: false
 #| message: false
-
-# This chunk loads any packages we need.
-# Because "message: false", any R messages from this chunk do not appear in our paper.
 
 library(tidyverse)
 library(usmap)
@@ -34,11 +31,7 @@ library(usmap)
 #| echo: false
 #| message: false
 
-# This chunk might read our data.
-# It might clean the data, create new variables, etc.
-# Now our data are ready for our paper.
-
-# Because echo: false, this chunk itself is not shown.
+# read data, clean the data, create new variables, etc.
 
 # Union Data: obtained from Tidy Tuesday
 union_wages <- read_rds("../Data/union_wages.rds")
@@ -54,163 +47,15 @@ income_distribution <- read_rds("../Data/income_distribution.rds")
 minimum_wage <- read_csv("../Data/minimum_wage_data.csv",show_col_types = FALSE)
 
 
-# Clean house election data
-house <- house |>
-  group_by(year, state, district) |> # group for next line
-  filter(candidatevotes == max(candidatevotes)) |> #only include candidates that won
-  ungroup() |> 
-  mutate(state = str_to_sentence(state)) |> # change from all caps to sentence case) 
-  select(!(state_fips:office)) |> #Remove unwanted columns
-  select(!(stage:candidate)) |> 
-  select(!(writein:fusion_ticket)) |> 
-  rename(state_abbreviation = state_po) |>  # rename state abbreviation column
-  mutate(party = case_when(
-    str_detect(party, "DEMOCRAT") ~ "DEMOCRAT",
-    str_detect(party, "REPUBLICAN") ~ "REUBLICAN",
-    str_detect(party, "INDEPENDENT") ~ "INDEPENDENT"
-  )) # Recode of party variable
-
-
-# Clean union wages data
-union_wages <- union_wages |> 
-  filter(facet == "all wage and salary workers") |> 
-  distinct(year, .keep_all = TRUE) |> 
-  select(-sample_size,
-         -at_cap) |> 
-  mutate(wage_percent_difference = union_wage_premium_raw, .keep = "unused") |> 
-  mutate(wage_percent_difference_adjusted = union_wage_premium_adjusted, .keep = "unused") |> 
-  mutate(union_type = facet, .keep = "unused")
-
-
-# Clean union states data
-union_states <- union_states |> 
-  select(-state_census_code,
-         -observations) |> # remove unwanted columns
-  mutate(employment_count = employment * 1000, .keep = "unused") |> # column measured in 1000s, this fixes it
-  mutate(union_employment_count = members * 1000, .keep = "unused") |> 
-  mutate(collective_bargain_employment_count = covered * 1000,
-         .keep = "unused") |> 
-  rename(
-    percent_union = p_members,
-    percent_collective_bargain = p_covered
-  ) #renamed columns
-
-
-# Clean income distribution data
-income_distribution <- income_distribution |> 
-  select(-number) |> # removing unwanted columns
-  select(!ends_with("moe")) |> 
-  select(year:income_mean) |> 
-  distinct(year, race, income_median, income_mean, .keep_all = TRUE) |> # only include one line per year. needed bc of multiple sectors that are not being used in data analysis
-  rename(median_income = income_median,
-         mean_income = income_mean) |> # renaming columns
-  filter(race == "All Races") |> 
-  select(-race)
-
-
-# Clean minimum wage data
-minimum_wage <- minimum_wage |> 
-  select(Year:CPI.Average) |> # selecting relevant columns
-  rename(year = Year,
-         state = State,
-         state_min_wage = State.Minimum.Wage,
-         state_min_wage_2020_adj = State.Minimum.Wage.2020.Dollars,
-         fed_min_wage = Federal.Minimum.Wage,
-         fed_min_wage_2020_adj = Federal.Minimum.Wage.2020.Dollars,
-         effective_min_wage = Effective.Minimum.Wage,
-         effective_min_wage_2020_adj = Effective.Minimum.Wage.2020.Dollars,
-         CPI_avg = CPI.Average
-  ) |> # renaming variables
-  filter(!state %in% c("U.S. Virgin Islands", "Puerto Rico", "Guam")) |>  # remove territory
-  mutate(state_abbreviation = 
-           ifelse(is.na(state.abb[match(state, state.name)]),
-                  "DC",
-                  state.abb[match(state, state.name)]),
-         .keep = "unused", .after = year) # replaces state with state abbreviation, NA values coded as DC as DC is the only NA value 
 ```
 
-```{r readdata}
-#| eval: false
-#| echo: false
- 
-# Because eval: false, this chunk is not run.
-
-# Joining data sets to create full state data
-full_state_data <- union_states |> 
-  filter(sector == "Total") |> 
-  select(-sector,
-         -state) |> 
-  left_join(house, by = c("year", "state_abbreviation")) |> 
-  mutate(decade = paste0((year - year %% 10), "s"),
-         party_binary = ifelse(party == "DEMOCRAT", 1, 0)) |> 
-  left_join(minimum_wage, by = c("year", "state_abbreviation")) |> 
-  group_by(year, state) |> 
-  mutate(party_state_average = mean(party_binary)) |>
-  ungroup() |> 
-  mutate(state = state.name[match(state_abbreviation, state.abb)], # fix state encoding
-         regions = state.region[match(state_abbreviation, state.abb)]) # fix region encoding
-
-state_column_list = c("year", "decade", "state", "state_abbreviation",
-                      "regions", "district", "party", "party_binary",
-                      "party_state_average",
-                      "employment_count", "union_employment_count",
-                      "collective_bargain_employment_count", "percent_union",
-                      "percent_collective_bargain", "state_min_wage",
-                      "state_min_wage_2020_adj", "fed_min_wage",
-                      "fed_min_wage_2020_adj", "effective_min_wage",
-                      "effective_min_wage_2020_adj", "CPI_avg")
-full_state_data <- full_state_data[, state_column_list] # reorder columns
-full_state_data$party[is.na(full_state_data$party)] <- "No election" # replace party NAs
-full_state_data$district[is.na(full_state_data$district)] <- "No election" # replace district NAs
-full_state_data$party_binary[is.na(full_state_data$party_binary)] <- "No election" # replace district NAs
-
-
-# Joining data sets to create full national data
-state_to_ntl_adjusted <- full_state_data |>
-  mutate(prop_2020_adj = fed_min_wage_2020_adj / fed_min_wage, .after = year) |>
-  distinct(year, .keep_all = TRUE) |>
-  select(year, prop_2020_adj)
-
-state_to_ntl_employment <- full_state_data |>
-  group_by(year) |>
-  summarise_at(vars(employment_count:collective_bargain_employment_count), sum)
-
-full_ntl_data <- income_distribution |> 
-  left_join(union_wages, by = "year") |>
-  left_join(state_to_ntl_adjusted, by = "year") |>
-  left_join(state_to_ntl_employment, by = "year") |>
-  mutate(decade = paste0((year - year %% 10), "s"), .after = year) |>
-  mutate(mean_median_income_difference = mean_income - median_income, .after = mean_income) |>
-   mutate(median_income_2020_adj = median_income * prop_2020_adj,
-         mean_income_2020_adj = mean_income * prop_2020_adj,
-         mean_median_income_difference_2020_adj = mean_median_income_difference * prop_2020_adj,
-         wage_2020_adj = wage * prop_2020_adj,
-         union_wage_2020_adj = union_wage * prop_2020_adj,
-         nonunion_wage_2020_adj = nonunion_wage * prop_2020_adj,
-         percent_union = union_employment_count / employment_count,
-         percent_collective_bargain = collective_bargain_employment_count / employment_count) |> 
-  select(-prop_2020_adj)
-
-ntl_column_list <- c("year", "decade", "mean_income",
-                     "mean_income_2020_adj", "median_income",
-                     "median_income_2020_adj", "mean_median_income_difference",
-                     "mean_median_income_difference_2020_adj", "wage",
-                     "wage_2020_adj", "union_wage", "union_wage_2020_adj",
-                     "nonunion_wage", "nonunion_wage_2020_adj",
-                     "wage_percent_difference", 
-                     "wage_percent_difference_adjusted",
-                     "employment_count", "union_employment_count", 
-                     "collective_bargain_employment_count",
-                     "percent_union", "percent_collective_bargain",
-                     "union_type")
-full_ntl_data <- full_ntl_data[, ntl_column_list] # reorder columns
-
-rm(house, income_distribution, minimum_wage, state_to_ntl_adjusted,
-   state_to_ntl_employment, union_states, union_wages, state_column_list,
-   ntl_column_list)
-```
 
 # Introduction
+
+Unions play a crucial role in negotiating wages and benefits for workers through collective bargaining agreements. The political landscape, particularly the House of Representatives, holds significant legislative authority in influencing workers' rights and labor policies. We examine the relationship between union employment, the composition of the House delegation, and economic variables such as income, minimum wages, and union wages. 
+
+In our research, we seek to understand how union membership and economic factors influence the level of representation by the Democratic Party in the House of Representatives. We hypothesize that there will be an association between the Democratic Party and the employment of union and collective bargaining employees.
+
 
 In this section, we introduce the reader to the phenomenon we investigate. We describe the way in which our analysis contributes to an important intellectual debate, or how it answers a pressing political or social question. We introduce our research question, hypotheses, data, and results. We signpost for the reader what's coming in the rest of the paper.
 
@@ -218,21 +63,21 @@ We remember that our paper is not a mystery novel. We note our core results earl
 
 Throughout our paper, we use active, first-person language and avoid the passive voice. For example, we write "we examine the relationship between $X$ and $Y$"; we do not write "the relationship between $X$ and $Y$ was examined." Where we do the analysis, we speak about it transparently. We use the present tense; for example, "In this paper, we argue \ldots" and "Paper XYZ demonstrates the relationship between \ldots".
 
+# \[Our Substance and Context Section Title Here\]
 
-# [Our Substance and Context Section Title Here]
+Here we go deeper into the intellectual debate, the political and social context of our investigation. To give the reader a clear sense of why we are writing this paper, we describe the relevant scholarly, technical, or popular literature. We give this section a meaningful *substantive* title; it is not entitled "Literature Review", for example. We cite at least three published, peer-reviewed scholarly works. For example, we could cite @mooree20 or @moorav12[^1], which we discussed in class.[^2] We only cite others' work in our paper when it enhances the reader's understanding of what we, the authors of this paper, are doing. We connect everything we cite to *our* investigation; this is our original research, not a book report or an annotated bibliography.
 
-Here we go deeper into the intellectual debate, the political and social context of our investigation. To give the reader a clear sense of why we are writing this paper, we describe the relevant scholarly, technical, or popular literature. We give this section a meaningful _substantive_ title; it is not entitled "Literature Review", for example. We cite at least three published, peer-reviewed scholarly works. For example, we could cite @mooree20 or @moorav12^[There should always be a space before the "(" in a citation date.], which we discussed in class.^[To cite a paper within parentheses, use, e.g., [@moore12].] We only cite others' work in our paper when it enhances the reader's understanding of what we, the authors of this paper, are doing.  We connect everything we cite to _our_ investigation; this is our original research, not a book report or an annotated bibliography.
+[^1]: There should always be a space before the "(" in a citation date.
+
+[^2]: To cite a paper within parentheses, use, e.g., [@moore12].
 
 We do not cite paper titles or journal names, unless our paper is about someone else's paper or about the set of articles in a journal. We do not cite authors' first, given names. We can refer to either what an author does, or what a paper does, but we should be consistent. For example, "@moorav12 argue that we should \ldots" refers to what the authors do; "@moorav12 argues that we should \ldots" refers to what the paper -- @moorav12 -- does.
 
 In order to integrate citations into the References section below, we add entries into our file `main.bib`. This is a plain-text file that we edit in RStudio. We store `main.bib` in the same folder as our paper's `.qmd` and `.pdf` files. Its entries are formatted so that they can be knit to `.pdf`; see [https://j.mp/2UzTXEZ](https://www.overleaf.com/learn/latex/Bibliography_management_with_bibtex#The_bibliography_file) for example entries for articles, books, and miscellaneous. We can get these entries automatically from Google Scholar by turning on BibTeX in the Google Scholar Settings - Bibliography Manager. Perhaps we use a tool like free, open-source BibDesk to help us manage the `.bib` file.
 
-
 # Data and Methods {#sec-data}
 
-This section describes the data we analyze. We describe the source of the data,
-and its primary features. We cite our data. We describe the methods we use to
-answer our question and to test our hypotheses.
+This section describes the data we analyze. We describe the source of the data, and its primary features. We cite our data. We describe the methods we use to answer our question and to test our hypotheses.
 
 If our data were `cars`, loaded in a chunk above, we note that our data have `r nrow(cars)` observations. Our unit of analysis is the cars; each row represents a different car that was measured.
 
@@ -246,18 +91,17 @@ Where there are less-critical details that we implement to improve our analysis 
 
 We cite the software we use. For example, we conduct our analysis using R version `r paste(R.version$major, R.version$minor, sep = ".")` [@rcoreteam23]. We rely on several elements of the `tidyverse` [@wickhamtidyverse]. Of course, we do not cite software that we do not use.
 
-# [Our Results Section Title Here]
+# \[Our Results Section Title Here\]
 
-Here, we explain and interpret our results. We try to learn as much as we can about our question as possible, given the data and analysis. We present our results clearly. We interpret them for the reader with precision and circumspection. We avoid making claims that are not substantiated by our data. We are careful about causality. When we describe associations, we avoid language like "effects" and "increases"; we only describe "effects" or "impacts" when we have a causally well-identified research design. 
+Here, we explain and interpret our results. We try to learn as much as we can about our question as possible, given the data and analysis. We present our results clearly. We interpret them for the reader with precision and circumspection. We avoid making claims that are not substantiated by our data. We are careful about causality. When we describe associations, we avoid language like "effects" and "increases"; we only describe "effects" or "impacts" when we have a causally well-identified research design.
 
 Note that this section may be integrated into @sec-data, if joining the two improves the overall presentation.
 
 ## Predicting Distance with Speed
 
-Our results for the `cars` data include estimating the linear model 
+Our results for the `cars` data include estimating the linear model
 
-$$\text{Distance}_i = \beta_0 + \beta_1 (\text{Speed}_i) + \epsilon_i.$$
-Perhaps we start by plotting the data, as in @fig-cars.
+$$\text{Distance}_i = \beta_0 + \beta_1 (\text{Speed}_i) + \epsilon_i.$$ Perhaps we start by plotting the data, as in @fig-cars.
 
 ```{r fig-cars}
 #| echo: false
@@ -312,7 +156,6 @@ We do not report estimates like `p = 3.242e-15`, since these are computational z
 
 We do not report quantities to unhelpful degrees of precision. Although there were 112,030,874 votes cast from voting-eligible population of 242,690,810 in the U.S. in 2022, it is not helpful to report turnout as `r (112030874 / 242690810) * 100`%; writing `r round((112030874 / 242690810) * 100, 1)`% suffices.
 
-
 ## Comparing Distances between High- and Low-Speed Cars
 
 ```{r ttest}
@@ -328,7 +171,7 @@ t_lower_ci <- t_out$conf.int[1] |> round(2)
 t_upper_ci <- t_out$conf.int[2] |> round(2)
 ```
 
-To report the results of a $t$-test, we do so in text, and perhaps in a well-formatted table as well, such as @tbl-ttesttable. Here, as above, we report the important details in text. For example, when we define "high-speed" cars as those traveling above the mean speed, the difference between the high-speed and low-speed group means is `r t_out$estimate[2] - t_out$estimate[1]`, with a 95% confidence interval that covers $(`r -t_upper_ci`, `r -t_lower_ci`)$. 
+To report the results of a $t$-test, we do so in text, and perhaps in a well-formatted table as well, such as @tbl-ttesttable. Here, as above, we report the important details in text. For example, when we define "high-speed" cars as those traveling above the mean speed, the difference between the high-speed and low-speed group means is `r t_out$estimate[2] - t_out$estimate[1]`, with a 95% confidence interval that covers $(`r -t_upper_ci`, `r -t_lower_ci`)$.
 
 ```{r tbl-ttesttable}
 #| echo: FALSE
@@ -347,17 +190,8 @@ If I have tests of two outcomes from the same data, I can bind them together, as
 #| warning: FALSE
 #| tbl-cap: Distance and Square-root Distance by Speed Group
 
-cars <- cars |> mutate(dist_sqrt = (sqrt(dist)))
-t_out_2 <- t.test(dist_sqrt ~ hs, data = cars)
 
-tab <- rbind(
-  model_parameters(t_out),
-  model_parameters(t_out_2)
-)
 
-tab |> 
-  print_md(
-    footer = "")
 ```
 
 # Discussion
