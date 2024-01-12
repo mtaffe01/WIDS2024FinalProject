@@ -3,10 +3,10 @@ This is the final Project for WIDS 2024 by Michael, Melanie, and Ramiro comparin
 
 Where to find files:
 
-The full R code with all of our data cleaning and grpahs is in the `Code` folder
+The full R code with all of our data cleaning and graphs is in the `Code` folder
 
 The final, cleaned paper is found in the documents folder.
 
-the final presentation is found in the documents folder.
+The final presentation is found in the documents folder.
 
-the saved images of all graphs are found under Documents/Graph_Images
+The saved images of all graphs are found under Documents/Graph_Images
