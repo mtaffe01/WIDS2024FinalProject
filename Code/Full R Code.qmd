@@ -7,7 +7,6 @@ editor: visual
 
 # 1. Comparing interactions between collective bargaining rates, wages, and House of Representative elections
 
-**Insert abstract of project, where we got our data, what our data looks like, and other information here**
 
 # 2. Data Analysis
 
@@ -75,11 +74,13 @@ In the house data set, we can see a significant amount of NA values in the runof
 ```{r}
 summary(income_distribution)
 ```
+
 In this table, we can see that there are a few NA values in the tables, and some of the variables have a noticable skew. After some basic data cleaning is done we will see if these values remain
 
 ```{r}
 summary(minimum_wage)
 ```
+
 Only one column has NA values in this data frame, and in that column only 15 out of 2862 observations are missing values. Again, we will see if these values remain after our data cleaning
 
 ### 2.2.2 Cleaning data script
@@ -103,7 +104,6 @@ house <- house |>
   )) |> 
   filter(state_abbreviation != "DC") # Removes the single line of DC data
 ```
-
 
 ```{r}
 union_wages <- union_wages |> 
@@ -171,6 +171,7 @@ head(house)
 head(income_distribution)
 head(minimum_wage)
 ```
+
 ```{r}
 colSums(is.na(house))
 colSums(is.na(income_distribution))
@@ -178,8 +179,8 @@ colSums(is.na(minimum_wage))
 colSums(is.na(union_wages))
 colSums(is.na(union_states))
 ```
-There are no more NA values
 
+There are no more NA values
 
 ```{r}
 # seeing what years we have
@@ -234,8 +235,8 @@ full_state_data$party_binary[is.na(full_state_data$party_binary)] <- "No electio
 head(full_state_data)
 summary(full_state_data)
 ```
-After combining the dataset, we can see that not all of the variables are tracked every year, causing there to be NA values. We will keep this in mind as we continue our data analysis.
 
+After combining the dataset, we can see that not all of the variables are tracked every year, causing there to be NA values. We will keep this in mind as we continue our data analysis.
 
 #### 2.2.3.2 National Dataframes
 
@@ -297,6 +298,7 @@ rm(house, income_distribution, minimum_wage, state_to_ntl_adjusted,
 head(full_ntl_data)
 summary(full_ntl_data)
 ```
+
 There are no NA values in our national data set.
 
 ## 2.3 EDA
@@ -419,8 +421,7 @@ ggsave("../Documents/Graph_Images/Income_by_year_adj.png", width=7.29, height=5.
 rm(Income_by_year_adj)
 ```
 
-
-The two above graphs show that when accounting for inflation, Americans are earning less per year now than they did 40 years ago. As we will see later on when examining wage data at a national level, there are numerous external reasons for this. Most notably, an aging population that is no longer working is likely driving the average down. It is possible that the average worker is earning more but we do not have the data to verify this. 
+The two above graphs show that when accounting for inflation, Americans are earning less per year now than they did 40 years ago. As we will see later on when examining wage data at a national level, there are numerous external reasons for this. Most notably, an aging population that is no longer working is likely driving the average down. It is possible that the average worker is earning more but we do not have the data to verify this.
 
 ```{r}
 state_minimum_wage_data <- full_state_data |> # This object will be used to create the graph and also in the data subset
@@ -457,7 +458,7 @@ rm(Min_wage_by_state)
 rm(state_minimum_wage_data) # remove object to make graph
 ```
 
-This graph can be used to draw a number of interesting inferences. First, there is a decently dark line at the bottom that indicates a number of states still have no minimum wage. This will be examined in greater detailed in the next graph. Next, we can see that there is a significant shift post 2014 of raising the minimum wage at the state level. Before that time almost no state had a adjusted minimum wage over $10. Now, there are numerous states that surpass this value. Final, we can see that the federal minimum wage has been slowly losing value due to inflation since it was last raised in 2009.
+This graph can be used to draw a number of interesting inferences. First, there is a decently dark line at the bottom that indicates a number of states still have no minimum wage. This will be examined in greater detailed in the next graph. Next, we can see that there is a significant shift post 2014 of raising the minimum wage at the state level. Before that time almost no state had a adjusted minimum wage over \$10. Now, there are numerous states that surpass this value. Final, we can see that the federal minimum wage has been slowly losing value due to inflation since it was last raised in 2009.
 
 ```{r}
 effective_minimum_wage_data <- full_state_data |> 
@@ -576,7 +577,6 @@ This graph is incredibly interesting. First, a quick view of this graph shows th
 
 This graph demonstrates how political collective bargaining has become over the last 40 years. In the 1980s, there was almost no relationship between collective bargaining agreements and party affiliation. However, by 2020, there is now a significant bias.
 
-
 ```{r}
 #| message: FALSE
 CB_by_decade1 <- full_state_data |> 
@@ -597,7 +597,6 @@ CB_by_decade1
 ggsave("../Documents/Graph_Images/CB_by_decade1.png", width=7.29, height=5.41)
 rm(CB_by_decade1)
 ```
-
 
 ```{r}
 #| message: FALSE
@@ -620,12 +619,13 @@ CB_by_decade2
 ggsave("../Documents/Graph_Images/CB_by_decade2.png", width=7.29, height=5.41)
 rm(CB_by_decade2)
 ```
+
 These two graphs show very interesting results. First, we can see how unions have become politicized in the last 40 years. In the 1980s, there was almost no correlation between the amount of workers in a collective bargaining agreement and what the house delegation looked like in that state. By the 2010s, this had changed. From the second graph, we can see that the North Central and South regions are the main drivers behind this, seen in the steepening of the regression slope.
 
+## 2.4 Modeling
 
-## Modeling
+### 2.4.1 T-test between union and non union wages
 
-t test between union and non union wages
 ```{r}
 # 1980s
 full_ntl_data_1980s <- full_ntl_data |>
@@ -639,8 +639,8 @@ t.test(full_ntl_data_2010s$union_wage_2020_adj, full_ntl_data_2010s$nonunion_wag
 rm(full_ntl_data_1980s, full_ntl_data_2010s)
 ```
 
+### 2.4.2 Linear regression of percent collective bargaining and party state average
 
-Linear regression of percent collective bargaining and party state average
 ```{r}
 decade_region <- list(
   c("1980s", "Northeast"),
@@ -695,7 +695,8 @@ CB_party_regression <- full_join(CB_party_regression, CB_party_temp,
 rm(CB_party_temp, x, regression_decade_region)
 ```
 
-Graph of regression estimate by decade and year
+#### 2.4.2.1 Graph of regression estimate by decade and year
+
 ```{r}
 Regression_plot <- ggplot(CB_party_regression, aes(x = Decade, y = Estimate, fill = Region)) +
   geom_bar(stat = "identity", position = "dodge") +
@@ -711,5 +712,3 @@ Regression_plot
 ggsave("../Documents/Graph_Images/Regression_plot.png", width=7.29, height=5.41)
 rm(Regression_plot, CB_party_regression, decade_region)
 ```
-
-## Conclusion
