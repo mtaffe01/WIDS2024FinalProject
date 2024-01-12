@@ -1,5 +1,5 @@
 ---
-title: "Comparing Interactions Between Collective Bargaining Rates, Wages, and House of Representative Elections"
+title: "Comparing Interactions Between Collective Bargaining, Wages and Income, and House of Representative Elections"
 author: 
   - Ramiro Arevalo^[American University]
   - Melanie Klein^[American University]
@@ -23,6 +23,7 @@ abstract: "For our project, our goal is to examine the relationships between col
 #| echo: false
 #| message: false
 
+library(parameters)
 library(tidyverse)
 library(usmap)
 ```
@@ -31,37 +32,197 @@ library(usmap)
 #| echo: false
 #| message: false
 
-# read data, clean the data, create new variables, etc.
+# Read data
 
-# Union Data: obtained from Tidy Tuesday
+## Union Data: obtained from Tidy Tuesday
 union_wages <- read_rds("../Data/union_wages.rds")
 union_states <- read_rds("../Data/union_states.rds")
 
-# Election Data: Obtained from Tidy Tuesday
+## Election Data: Obtained from Tidy Tuesday
 house <- read_rds("../Data/house.rds")
 
-# Wage Data: Obtained from Tidy Tuesday
+## Wage Data: Obtained from Tidy Tuesday
 income_distribution <- read_rds("../Data/income_distribution.rds")
 
-# Minimum Wage Data: Obtained from U.S. Department of Labor
+## Minimum Wage Data: Obtained from U.S. Department of Labor
 minimum_wage <- read_csv("../Data/minimum_wage_data.csv",show_col_types = FALSE)
 
+
+# Clean data
+
+## house data
+house <- house |>
+  group_by(year, state, district) |> # group for next line
+  filter(candidatevotes == max(candidatevotes)) |> #only include candidates that won
+  ungroup() |> 
+  mutate(state = str_to_sentence(state)) |> # change from all caps to sentence case) 
+  select(!(state_fips:office)) |> #Remove unwanted columns
+  select(!(stage:candidate)) |> 
+  select(!(writein:fusion_ticket)) |> 
+  rename(state_abbreviation = state_po) |>  # rename state abbreviation column
+  mutate(party = case_when( # Recode of party variable
+    str_detect(party, "DEMOCRAT") ~ "DEMOCRAT",
+    str_detect(party, "REPUBLICAN") ~ "REUBLICAN",
+    str_detect(party, "INDEPENDENT") ~ "INDEPENDENT"
+  )) |> 
+  filter(state_abbreviation != "DC") # Removes the single line of DC data
+
+## union wages data
+union_wages <- union_wages |> 
+  filter(facet == "all wage and salary workers") |> 
+  distinct(year, .keep_all = TRUE) |> 
+  select(-sample_size,
+         -at_cap) |> 
+  mutate(wage_percent_difference = union_wage_premium_raw, .keep = "unused") |> 
+  mutate(wage_percent_difference_adjusted = union_wage_premium_adjusted, .keep = "unused") |> 
+  mutate(union_type = facet, .keep = "unused")
+
+## union states data
+union_states <- union_states |> 
+  select(-state_census_code,
+         -observations) |> # remove unwanted columns
+  mutate(employment_count = employment * 1000, .keep = "unused") |> # column measured in 1000s, this fixes it
+  mutate(union_employment_count = members * 1000, .keep = "unused") |> 
+  mutate(collective_bargain_employment_count = covered * 1000,
+         .keep = "unused") |> 
+  rename(
+    percent_union = p_members,
+    percent_collective_bargain = p_covered
+  ) #renamed columns
+
+## income distribution data
+income_distribution <- income_distribution |> 
+  select(-number) |> # removing unwanted columns
+  select(!ends_with("moe")) |> 
+  select(year:income_mean) |> 
+  distinct(year, race, income_median, income_mean, .keep_all = TRUE) |> # only include one line per year. needed bc of multiple sectors that are not being used in data analysis
+  rename(median_income = income_median,
+         mean_income = income_mean) |> # renaming columns
+  filter(race == "All Races") |> 
+  select(-race)
+
+## minimum wage data
+minimum_wage <- minimum_wage |> 
+  select(Year:CPI.Average) |> # selecting relevant columns
+  rename(year = Year,
+         state = State,
+         state_min_wage = State.Minimum.Wage,
+         state_min_wage_2020_adj = State.Minimum.Wage.2020.Dollars,
+         fed_min_wage = Federal.Minimum.Wage,
+         fed_min_wage_2020_adj = Federal.Minimum.Wage.2020.Dollars,
+         effective_min_wage = Effective.Minimum.Wage,
+         effective_min_wage_2020_adj = Effective.Minimum.Wage.2020.Dollars,
+         CPI_avg = CPI.Average
+  ) |> # renaming variables
+  filter(!state %in% c("U.S. Virgin Islands", "Puerto Rico", "Guam")) |>  # remove territory
+  mutate(state_abbreviation = 
+           ifelse(is.na(state.abb[match(state, state.name)]),
+                  "DC",
+                  state.abb[match(state, state.name)]),
+         .keep = "unused", .after = year) # replaces state with state abbreviation, NA values coded as DC as DC is the only NA value 
+
+
+# Merging data frames
+
+## state data frame
+full_state_data <- union_states |> 
+  filter(sector == "Total") |> 
+  select(-sector,
+         -state) |> 
+  left_join(house, by = c("year", "state_abbreviation")) |> 
+  mutate(decade = paste0((year - year %% 10), "s"),
+         party_binary = ifelse(party == "DEMOCRAT", 1, 0)) |> 
+  left_join(minimum_wage, by = c("year", "state_abbreviation")) |> 
+  group_by(year, state) |> 
+  mutate(party_state_average = mean(party_binary)) |>
+  ungroup() |> 
+  mutate(state = state.name[match(state_abbreviation, state.abb)], # fix state encoding
+         regions = state.region[match(state_abbreviation, state.abb)]) |>  # fix region encoding
+  filter(year >= 1984 & year <= 2019) |> 
+  filter(state_abbreviation != "DC") # Removes the single line of DC data
+
+state_column_list = c("year", "decade", "state", "state_abbreviation",
+                      "regions", "district", "party", "party_binary",
+                      "party_state_average",
+                      "employment_count", "union_employment_count",
+                      "collective_bargain_employment_count", "percent_union",
+                      "percent_collective_bargain", "state_min_wage",
+                      "state_min_wage_2020_adj", "fed_min_wage",
+                      "fed_min_wage_2020_adj", "effective_min_wage",
+                      "effective_min_wage_2020_adj", "CPI_avg")
+full_state_data <- full_state_data[, state_column_list] # reorder columns
+full_state_data$party[is.na(full_state_data$party)] <- "No election" # replace party NAs
+full_state_data$district[is.na(full_state_data$district)] <- "No election" # replace district NAs
+full_state_data$party_binary[is.na(full_state_data$party_binary)] <- "No election" # replace district NAs
+
+## national data frame
+state_to_ntl_adjusted <- full_state_data |>
+  mutate(prop_2020_adj = fed_min_wage_2020_adj / fed_min_wage, .after = year) |>
+  distinct(year, .keep_all = TRUE) |>
+  select(year, prop_2020_adj)
+
+state_to_ntl_employment <- full_state_data |>
+  group_by(year) |>
+  summarise_at(vars(employment_count:collective_bargain_employment_count), sum)
+
+full_ntl_data <- income_distribution |> 
+  left_join(union_wages, by = "year") |>
+  left_join(state_to_ntl_adjusted, by = "year") |>
+  left_join(state_to_ntl_employment, by = "year") |>
+  mutate(decade = paste0((year - year %% 10), "s"), .after = year) |>
+  mutate(mean_median_income_difference = mean_income - median_income, .after = mean_income) |>
+   mutate(median_income_2020_adj = median_income * prop_2020_adj,
+         mean_income_2020_adj = mean_income * prop_2020_adj,
+         mean_median_income_difference_2020_adj = mean_median_income_difference * prop_2020_adj,
+         wage_2020_adj = wage * prop_2020_adj,
+         union_wage_2020_adj = union_wage * prop_2020_adj,
+         nonunion_wage_2020_adj = nonunion_wage * prop_2020_adj,
+         percent_union = union_employment_count / employment_count,
+         percent_collective_bargain = collective_bargain_employment_count / employment_count) |> 
+  select(-prop_2020_adj) |> 
+  filter(year >= 1984 & year <= 2019)
+
+ntl_column_list <- c("year", "decade", "mean_income",
+                     "mean_income_2020_adj", "median_income",
+                     "median_income_2020_adj", "mean_median_income_difference",
+                     "mean_median_income_difference_2020_adj", "wage",
+                     "wage_2020_adj", "union_wage", "union_wage_2020_adj",
+                     "nonunion_wage", "nonunion_wage_2020_adj",
+                     "wage_percent_difference", 
+                     "wage_percent_difference_adjusted",
+                     "employment_count", "union_employment_count", 
+                     "collective_bargain_employment_count",
+                     "percent_union", "percent_collective_bargain",
+                     "union_type")
+full_ntl_data <- full_ntl_data[, ntl_column_list] # reorder columns
+
+rm(house, income_distribution, minimum_wage, state_to_ntl_adjusted,
+   state_to_ntl_employment, union_states, union_wages, state_column_list,
+   ntl_column_list)
 
 ```
 
 
 # Introduction
 
-Unions play a crucial role in negotiating wages and benefits for workers through collective bargaining agreements. The political landscape, particularly the House of Representatives, holds significant legislative authority in influencing workers' rights and labor policies. We examine the relationship between unions and collective bargaining agreements, U.S. House of Representatives election results, and economic variables including the incomes and wages of Americans.
-
-In our research, we seek to understand how union membership and economic factors influence the level of representation by the Democratic Party in the House of Representatives. We hypothesize that there will be an association between the proportion of the House delegation that is Democratic and the employment of union and collective bargaining workers.
+Unions play a crucial role in negotiating wages and benefits for workers through collective bargaining agreements. The political landscape, particularly the House of Representatives, holds significant legislative authority in influencing workers' rights and labor policies. We examine the relationship between unions and collective bargaining agreements, U.S. House of Representatives election results, and economic variables including the incomes and wages of Americans. These project topics are motivated by the recent surge in union activity, increased political polarization, and a rise in wealth inequality.
 
 
-In this section, we introduce the reader to the phenomenon we investigate. We describe the way in which our analysis contributes to an important intellectual debate, or how it answers a pressing political or social question. We introduce our research question, hypotheses, data, and results. We signpost for the reader what's coming in the rest of the paper.
+In this paper, we use three research questions to guide our analysis:
 
-We remember that our paper is not a mystery novel. We note our core results early and often.
+1.    Is there any relationship between collective bargaining rates among workers to House delegation makeup?
+2.    Is there any relationship between collective bargaining rates among workers and wages?
+3.    Is there any relationship between collective bargaining rates among workers and wages?
 
-Throughout our paper, we use active, first-person language and avoid the passive voice. For example, we write "we examine the relationship between $X$ and $Y$"; we do not write "the relationship between $X$ and $Y$ was examined." Where we do the analysis, we speak about it transparently. We use the present tense; for example, "In this paper, we argue \ldots" and "Paper XYZ demonstrates the relationship between \ldots".
+Guided by our research questions, we have two hypothesis: 
+
+1.    There is a significant correlation between collective bargaining rates and higher amounts of Democrat representation in the House of Representatives. 
+2.    Unions will lead to higher wages.
+
+We use five data sets that are joined into two data frames to explore our research questions. We create a data frame that stores information at the national level about income and union wages, and a data frame that stores information at the state level about minimum wages, union employment, and House election results.
+
+When conducting a regression analysis, it demonstrates that the correlation between collective bargaining and political leanings has gotten stronger in the last four decades from 1984 to 2019. Additionally, when conducting t-tests among union and non union wages, there is a statistically significant difference that demonstrates an increasing wage differential over the same time period.
+
 
 # \[Our Substance and Context Section Title Here\]
 
@@ -91,108 +252,145 @@ Where there are less-critical details that we implement to improve our analysis 
 
 We cite the software we use. For example, we conduct our analysis using R version `r paste(R.version$major, R.version$minor, sep = ".")` [@rcoreteam23]. We rely on several elements of the `tidyverse` [@wickhamtidyverse]. Of course, we do not cite software that we do not use.
 
-# \[Our Results Section Title Here\]
 
-Here, we explain and interpret our results. We try to learn as much as we can about our question as possible, given the data and analysis. We present our results clearly. We interpret them for the reader with precision and circumspection. We avoid making claims that are not substantiated by our data. We are careful about causality. When we describe associations, we avoid language like "effects" and "increases"; we only describe "effects" or "impacts" when we have a causally well-identified research design.
+# Exploring Correlations: Linear Regression Analyses and T-Tests on Collective Bargaining and Wage Disparities
 
-Note that this section may be integrated into @sec-data, if joining the two improves the overall presentation.
+Based on our exploratory data analysis, we are conducting linear regression analyses and t-tests. The linear regressions use data from `full_state_data` and explore how collective bargaining agreements are correlated with Democratic representatives being elected to the House in all four regions. The results are used to examine if the north central region and southern region are driving this stronger correlation over time. Additionally, the t-test uses data from `full_ntl_data` to understand if the observed variations in wages between unionized and non-unionized workers are statistically meaningful. By looking at different decades, we aim to analyze potential shifts in wage consistencies or differences over time. This provides insight into the dynamics of the labor market.
 
-## Predicting Distance with Speed
 
-Our results for the `cars` data include estimating the linear model
+## Predicting Democratic House Delegations with Percentage of Workers in Collective Bargaining Argreements
 
-$$\text{Distance}_i = \beta_0 + \beta_1 (\text{Speed}_i) + \epsilon_i.$$ Perhaps we start by plotting the data, as in @fig-cars.
-
-```{r fig-cars}
-#| echo: false
-#| fig-cap: Distance on Speed
-
-ggplot(cars, aes(speed, dist)) +
-  geom_point()
-```
-
-The data may be roughly linear, though there may be some non-linearity we should incorporate.
+@tbl-linear performs a linear regression between the percent of workers in a collective bargaining agreement and the proportion of the House delegation that is Democratic for the 1980s and 2010s in each region, as well as for all of the regions combined 
 
 ```{r linearmodel}
 #| echo: false
 
-# Estimate a linear model:
-lm_out <- lm(dist ~ speed, data = cars)
-# Extract the coefficient on speed:
-cars_speed_coef <- coef(lm_out)["speed"]
+decade_region <- list(
+  c("1980s", "Northeast"),
+  c("1980s", "West"),
+  c("1980s", "North Central"),
+  c("1980s", "South"),
+  c("2010s", "Northeast"),
+  c("2010s", "West"),
+  c("2010s", "North Central"),
+  c("2010s", "South")
+)
+                  
+regression_decade_region <- function(decade1, region1) {
+  full_state_data_filtered <- subset(full_state_data, regions == region1 & decade == decade1)
+  model <- lm(full_state_data_filtered$party_state_average~full_state_data_filtered$percent_collective_bargain) 
+  summary(model)$coefficients |> 
+  as_tibble() |> 
+  mutate(Reggression_Run = c("Intercept", "percent_collective_bargain"),
+         Decade = c(decade1, decade1),
+         Region = c(region1, region1),
+         .before = Estimate)
+}  
+
+full_state_data_temp <- full_state_data |>
+  filter(year >= 1984 & year < 1990)
+CB_party_regression <- summary(lm(full_state_data_temp$party_state_average~full_state_data_temp$percent_collective_bargain))$coefficients |> 
+  as_tibble() |> 
+  mutate(Reggression_Run = c("Intercept", "percent_collective_bargain"),
+         Decade = c("1980s", "1980s"),
+         Region = c("all", "all"),
+         .before = Estimate)
+
+for (x in decade_region) {
+  CB_party_regression <- full_join(CB_party_regression, regression_decade_region(x[1], x[2]),
+                                   by = join_by(Reggression_Run, Decade, Region, Estimate, `Std. Error`, `t value`, `Pr(>|t|)`))
+}
+
+full_state_data_temp <- full_state_data |>
+  filter(year >= 2010 & year < 2020)
+CB_party_temp <- summary(lm(full_state_data_temp$party_state_average~full_state_data_temp$percent_collective_bargain))$coefficients |> 
+  as_tibble() |> 
+  mutate(Reggression_Run = c("Intercept", "percent_collective_bargain"),
+         Decade = c("2010s", "2010s"),
+         Region = c("all", "all"),
+         .before = Estimate)
+
+CB_party_regression <- full_join(CB_party_regression, CB_party_temp,
+                                   by = join_by(Reggression_Run, Decade, Region, Estimate, `Std. Error`, `t value`, `Pr(>|t|)`)) |>
+  filter(Reggression_Run == "percent_collective_bargain") |>
+  rename(P_Value = "Pr(>|t|)")
+
 ```
 
-Below we show the model estimates. The first table uses `xtable()`, the second uses `stargazer()` [@hlavac18].
-
-```{r linearxtable}
+```{r tbl-linear}
 #| echo: false
 #| message: false
 #| results: 'asis'
+#| tbl-cap: Linear Regression
 
-# We can print regression tables with xtable or stargazer:
-regr_table <- xtable::xtable(lm_out,
-                             digits = 2,
-                             caption = "Our Informative Caption")
+regr_table <- xtable::xtable(CB_party_regression,
+                             digits = 2)
 
 print(regr_table, comment = FALSE)
 ```
 
-```{r linearstargazer}
-#| echo: false
-#| message: false
-#| results: 'asis'
+For all linear regressions, $p < 0.05$, except for in the 1980s when examining `all` regions, $p = 0.659$.
 
-# We can print regression tables with xtable or stargazer:
-stargazer::stargazer(lm_out, 
-                     title = "Our Informative Title",
-                     dep.var.caption = "Outcome",
-                     digits = 2,
-                     header = FALSE)
+```{r fig-estimates}
+#| echo: false
+#| fig-cap: Linear Regression Estimates
+
+ggplot(CB_party_regression, aes(x = Decade, y = Estimate, fill = Region)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  geom_text(aes(label = sprintf("P=%.3f", P_Value)),
+             position = position_dodge(width = 0.9),
+             vjust = -0.2,
+             size = 2) +
+  theme_minimal() +
+  labs(title = "Linear Regression Estimate by Decade",
+       subtitle = "Model of Percent Collective Bargaining vs Democratic House Proportion")
 ```
 
-Using the `cars` data, we find that each unit of speed is associated with `r round(cars_speed_coef, 1)` more units of distance. We draw out what this really means, and what it implies. For example, if a typical difference among our observations is 7 units of speed, then our model estimates that a typical difference in distance among our observations is $7 \times `r round(cars_speed_coef, 1)` = `r 7 * round(cars_speed_coef, 1)`$ units of distance. We describe the substantive relevance of this number.
+@fig-estimates plots the `Estimate` values calculated in the linear regressions.
+The regression analysis shows that the south and north central regions in the United States are the main regions that have seen union membership rates and political leanings show increased correlation. The south and north central regions have the greatest increase in their estimate values from the 1980s to the 2010s among the four regions.
 
-We do not report estimates like `p = 3.242e-15`, since these are computational zeros. Instead, we write $p < 0.001$ or $p \approx 0$, as appropriate.
 
-We do not report quantities to unhelpful degrees of precision. Although there were 112,030,874 votes cast from voting-eligible population of 242,690,810 in the U.S. in 2022, it is not helpful to report turnout as `r (112030874 / 242690810) * 100`%; writing `r round((112030874 / 242690810) * 100, 1)`% suffices.
+## Comparing Wages between Union and Non Union Workers
 
-## Comparing Distances between High- and Low-Speed Cars
+Our results for these t-tests determine if there is a statistically significant difference between union wages and non union wages in the 1980s and the 2010s.
 
 ```{r ttest}
 #| echo: FALSE
 
-# Create a binary variable for "high-speed":
-cars <- cars |> mutate(hs = ifelse(speed > mean(speed), 1, 0))
+# 1980s
+full_ntl_data_1980s <- full_ntl_data |>
+  filter(decade == "1980s")
+t_out_1980s <- t.test(full_ntl_data_1980s$nonunion_wage_2020_adj, full_ntl_data_1980s$union_wage_2020_adj)
 
-# Conduct t-test:
-t_out <- t.test(dist ~ hs, cars)
+t_lower_ci_1980s <- t_out_1980s$conf.int[1] |> round(2)
+t_upper_ci_1980s <- t_out_1980s$conf.int[2] |> round(2)
 
-t_lower_ci <- t_out$conf.int[1] |> round(2)
-t_upper_ci <- t_out$conf.int[2] |> round(2)
+# 2010s
+full_ntl_data_2010s <- full_ntl_data |>
+  filter(decade == "2010s")
+t_out_2010s <- t.test(full_ntl_data_2010s$nonunion_wage_2020_adj, full_ntl_data_2010s$union_wage_2020_adj)
+
+t_lower_ci_2010s <- t_out_2010s$conf.int[1] |> round(2)
+t_upper_ci_2010s <- t_out_2010s$conf.int[2] |> round(2)
 ```
 
-To report the results of a $t$-test, we do so in text, and perhaps in a well-formatted table as well, such as @tbl-ttesttable. Here, as above, we report the important details in text. For example, when we define "high-speed" cars as those traveling above the mean speed, the difference between the high-speed and low-speed group means is `r t_out$estimate[2] - t_out$estimate[1]`, with a 95% confidence interval that covers $(`r -t_upper_ci`, `r -t_lower_ci`)$.
-
-```{r tbl-ttesttable}
-#| echo: FALSE
-#| warning: FALSE
-#| tbl-cap: Distance by Speed Group
-
-parameters::model_parameters(t_out) |> 
-  parameters::print_md(
-    footer = "")
-```
-
-If I have tests of two outcomes from the same data, I can bind them together, as in @tbl-ttesttable2:
+The difference between union wages and non union wages means in the 1980s is `r t_out_1980s$estimate[2] - t_out_1980s$estimate[1]`, with a 95% confidence interval that covers $(`r -t_upper_ci_1980s`, `r -t_lower_ci_1980s`)$. The difference between union wages and non union wages means in the 2010s is `r t_out_2010s$estimate[2] - t_out_2010s$estimate[1]`, with a 95% confidence interval that covers $(`r -t_upper_ci_2010s`, `r -t_lower_ci_2010s`)$. The 95% confidence interval for the 1980s has a smaller range than the 95% confidence interval for the 2010s, demonstrating an increasing wage differential over time.
 
 ```{r tbl-ttesttable2}
 #| echo: FALSE
 #| warning: FALSE
-#| tbl-cap: Distance and Square-root Distance by Speed Group
+#| tbl-cap: Wages by Union and Non Union Workers
 
+tab <- rbind(
+  model_parameters(t_out_1980s),
+  model_parameters(t_out_2010s)
+)
 
-
+tab |> 
+  print_md(
+    footer = "")
 ```
+
 
 # Discussion
 
