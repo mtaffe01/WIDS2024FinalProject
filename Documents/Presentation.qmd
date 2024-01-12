@@ -22,7 +22,7 @@ The research questions we used to guide our analysis:
 
 1.  Is there any relationship between collective bargaining rates among workers to house delegation makeup?
 2.  Is there any relationship between collective bargaining rates among workers and wages?
-3.  Do collective bargaining rates effect wealth inequality? 
+3.  Do collective bargaining rates effect wealth inequality?
 
 ## Hypotheses
 
@@ -163,3 +163,11 @@ From our data analysis it can be inferred that collective bargaining agreements 
 # Thank You
 
 ## Bibliography {.smaller}
+
+"Johnthegeek". 2021. “Wealth and income over time.” GitHub. https://github.com/rfordatascience/tidytuesday/blob/master/data/2021/2021-02-09/readme.md.
+
+"Johnthegeek". 2023. “Union Membership in the United States.” GitHub. https://github.com/rfordatascience/tidytuesday/blob/master/data/2023/2023-09-05/readme.md.
+
+"Johnthegeek". 2023. “US House Election Results.” GitHub. https://github.com/rfordatascience/tidytuesday/blob/master/data/2023/2023-11-07/readme.md.
+
+"LisleJoem". 2021. “US Minimum Wage by State from 1968 to 2020 and 2020 Equivalent Dollars.” Kaggle. https://www.kaggle.com/datasets/lislejoem/us-minimum-wage-by-state-from-1968-to-2017.
