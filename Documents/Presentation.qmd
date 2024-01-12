@@ -16,6 +16,12 @@ For our project, our goal is to examine the relationships between collective bar
 
 ## Literature Review
 
+-   The decline of organized labor in the United States coincided with a large increase in wage inequality. From 1973 to 2007, men’s wage inequality increased by 40 percent, from .25 to .35, with most of the rise unfolding from 1978 to 2000.
+
+-   ..even in a period of labor weakness (2000-2014), union activism increases the wages of union members.
+
+-   “Particularly since the early 2000s, when the Bush administration’s NLRB appointments led to a series of decisions that were especially hostile to organized labor ([Liebman 2007](https://muse.jhu.edu/article/659928#b25); [Farber 2014](https://muse.jhu.edu/article/659928#b15)).
+
 ## Project Question
 
 The research questions we used to guide our analysis:
@@ -172,3 +178,12 @@ From our data analysis it can be inferred that collective bargaining agreements 
 "Johnthegeek". 2023. “US House Election Results.” GitHub. https://github.com/rfordatascience/tidytuesday/blob/master/data/2023/2023-11-07/readme.md.
 
 "LisleJoem". 2021. “US Minimum Wage by State from 1968 to 2020 and 2020 Equivalent Dollars.” Kaggle. https://www.kaggle.com/datasets/lislejoem/us-minimum-wage-by-state-from-1968-to-2017.
+
+## Bibliography pt 2 {.smaller}
+
+Western, B., & Rosenfeld, J. (2011). Unions, norms, and the rise in U.S. wage inequality. American Sociological Review, 76(4), 513-537. \
+Retrieved from <https://www.proquest.com/scholarly-journals/unions-norms-rise-u-s-wage-inequality/docview/908813088/se-2>
+
+Wilmers, Nathan. “Labor Unions as Activist Organizations: A Union Power Approach to Estimating Union Wage Effects.” Social Forces, vol. 95, no. 4, 2017, pp. 1451–77. JSTOR, <http://www.jstor.org/stable/26166881> Accessed 9 Jan. 2024.
+
+Freeman, Richard. et al. How Does Declining Unionism Affect the American Middle Class and Intergenerational Mobility? / Richard Freeman, Eunice Han, David Madland, Brendan V. Duke. Cambridge, Mass: National Bureau of Economic Research, 2015. Print.
