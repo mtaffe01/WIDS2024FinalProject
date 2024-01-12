@@ -585,7 +585,21 @@ These two graphs show very interesting results. First, we can see how unions hav
 
 ## Modeling
 
-Regression between percent collective bargaining and party state average
+t test between union and non union wages
+```{r}
+# 1980s
+full_ntl_data_1980s <- full_ntl_data |>
+  filter(decade == "1980s")
+t.test(full_ntl_data_1980s$union_wage_2020_adj, full_ntl_data_1980s$nonunion_wage_2020_adj)
+
+# 2010s
+full_ntl_data_2010s <- full_ntl_data |>
+  filter(decade == "2010s")
+t.test(full_ntl_data_2010s$union_wage_2020_adj, full_ntl_data_2010s$nonunion_wage_2020_adj)
+```
+
+
+Linear regression of percent collective bargaining and party state average
 ```{r}
 decade_region <- list(
   c("1980s", "Northeast"),
@@ -633,15 +647,19 @@ CB_party_temp <- summary(lm(full_state_data_temp$party_state_average~full_state_
          .before = Estimate)
 
 CB_party_regression <- full_join(CB_party_regression, CB_party_temp,
-                                   by = join_by(Reggression_Run, Decade, Region, Estimate, `Std. Error`, `t value`, `Pr(>|t|)`))
-
-CB_party_regression |>
-  filter(Reggression_Run == "percent_collective_bargain")
+                                   by = join_by(Reggression_Run, Decade, Region, Estimate, `Std. Error`, `t value`, `Pr(>|t|)`)) |>
+  filter(Reggression_Run == "percent_collective_bargain") |>
+  rename(P_Value = "Pr(>|t|)")
 ```
 
-
-
-      
+Graph of regression estimate by decade and year
+```{r}
+ggplot(CB_party_regression, aes(x = Decade, y = Estimate, fill = Region)) +
+  geom_bar(stat = "identity", position = "dodge", color = ifelse(CB_party_regression$P_Value > 0.05, "black", NA), size = 0.2) +
+  theme_minimal() +
+  labs(title = "Linear Regression Estimate by Decade",
+       subtitle = "Model of Percent Collective Bargaining vs Proportion of House Delegation That is Democratic")
+```
 
 
 ## Conclusion
